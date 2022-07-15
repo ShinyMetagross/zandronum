@@ -55,6 +55,7 @@ class IDataBuffer;
 class FFlatVertexBuffer;
 class HWViewpointBuffer;
 class FLightBuffer;
+class FBoneBuffer;
 struct HWDrawInfo;
 class FMaterial;
 class FGameTexture;
@@ -143,6 +144,7 @@ public:
 	FFlatVertexBuffer *mVertexData = nullptr;	// Global vertex data
 	HWViewpointBuffer *mViewpoints = nullptr;	// Viewpoint render data.
 	FLightBuffer *mLights = nullptr;			// Dynamic lights
+	FBoneBuffer* mBones = nullptr;				// Bones!
 	IShadowMap mShadowMap;
 
 	IntRect mScreenViewport;

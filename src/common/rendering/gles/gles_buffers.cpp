@@ -275,8 +275,8 @@ void GLBuffer::GPUWaitSync()
 
 void GLVertexBuffer::SetFormat(int numBindingPoints, int numAttributes, size_t stride, const FVertexBufferAttribute *attrs)
 {
-	static int VFmtToGLFmt[] = { GL_FLOAT, GL_FLOAT, GL_FLOAT, GL_FLOAT, GL_UNSIGNED_BYTE, GL_FLOAT }; // TODO Fix last entry GL_INT_2_10_10_10_REV, normals for models will be broken
-	static uint8_t VFmtToSize[] = {4, 3, 2, 1, 4, 4};
+	static int VFmtToGLFmt[] = { GL_FLOAT, GL_FLOAT, GL_FLOAT, GL_FLOAT, GL_UNSIGNED_BYTE, GL_FLOAT, GL_INT }; // TODO Fix last entry GL_INT_2_10_10_10_REV, normals for models will be broken
+	static uint8_t VFmtToSize[] = {4, 3, 2, 1, 4, 4, 4};
 
 	mStride = stride;
 	mNumBindingPoints = numBindingPoints;

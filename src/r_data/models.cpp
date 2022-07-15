@@ -43,6 +43,7 @@
 #include "i_time.h"
 #include "texturemanager.h"
 #include "modelrenderer.h"
+#include "model_smd.h"
 
 
 #ifdef _MSC_VER
@@ -56,7 +57,6 @@ extern TDeletingArray<FVoxel *> Voxels;
 extern TDeletingArray<FVoxelDef *> VoxelDefs;
 
 void RenderFrameModels(FModelRenderer* renderer, FLevelLocals* Level, const FSpriteModelFrame* smf, const FState* curState, const int curTics, const PClass* ti, int translation);
-
 
 void RenderModel(FModelRenderer *renderer, float x, float y, float z, FSpriteModelFrame *smf, AActor *actor, double ticFrac)
 {
@@ -282,6 +282,7 @@ void RenderFrameModels(FModelRenderer *renderer, FLevelLocals *Level, const FSpr
 		{
 			FModel * mdl = Models[smf->modelIDs[i]];
 			auto tex = smf->skinIDs[i].isValid() ? TexMan.GetGameTexture(smf->skinIDs[i], true) : nullptr;
+
 			mdl->BuildVertexBuffer(renderer);
 
 			mdl->PushSpriteMDLFrame(smf, i);
@@ -309,19 +310,20 @@ static void ParseModelDefLump(int Lump);
 void InitModels()
 {
 	Models.DeleteAndClear();
+	animationClips.Clear();
 	SpriteModelFrames.Clear();
 	SpriteModelHash.Clear();
 
 	// First, create models for each voxel
 	for (unsigned i = 0; i < Voxels.Size(); i++)
 	{
-		FVoxelModel *md = new FVoxelModel(Voxels[i], false);
+		FVoxelModel* md = new FVoxelModel(Voxels[i], false);
 		Voxels[i]->VoxelIndex = Models.Push(md);
 	}
 	// now create GL model frames for the voxeldefs
 	for (unsigned i = 0; i < VoxelDefs.Size(); i++)
 	{
-		FVoxelModel *md = (FVoxelModel*)Models[VoxelDefs[i]->Voxel->VoxelIndex];
+		FVoxelModel* md = (FVoxelModel*)Models[VoxelDefs[i]->Voxel->VoxelIndex];
 		FSpriteModelFrame smf;
 		memset(&smf, 0, sizeof(smf));
 		smf.isVoxel = true;
@@ -367,15 +369,15 @@ void InitModels()
 	}
 
 	// create a hash table for quick access
-	SpriteModelHash.Resize(SpriteModelFrames.Size ());
-	memset(SpriteModelHash.Data(), 0xff, SpriteModelFrames.Size () * sizeof(int));
+	SpriteModelHash.Resize(SpriteModelFrames.Size());
+	memset(SpriteModelHash.Data(), 0xff, SpriteModelFrames.Size() * sizeof(int));
 
-	for (unsigned int i = 0; i < SpriteModelFrames.Size (); i++)
+	for (unsigned int i = 0; i < SpriteModelFrames.Size(); i++)
 	{
-		int j = ModelFrameHash(&SpriteModelFrames[i]) % SpriteModelFrames.Size ();
+		int j = ModelFrameHash(&SpriteModelFrames[i]) % SpriteModelFrames.Size();
 
 		SpriteModelFrames[i].hashnext = SpriteModelHash[j];
-		SpriteModelHash[j]=i;
+		SpriteModelHash[j] = i;
 	}
 }
 
@@ -393,6 +395,7 @@ static void ParseModelDefLump(int Lump)
 			FSpriteModelFrame smf;
 			memset(&smf, 0, sizeof(smf));
 			smf.xscale=smf.yscale=smf.zscale=1.f;
+			smf.animationID = -1;
 
 			auto type = PClass::FindClass(sc.String);
 			if (!type || type->Defaults == nullptr)
@@ -463,6 +466,16 @@ static void ParseModelDefLump(int Lump)
 					if (smf.modelIDs[index] == -1)
 					{
 						Printf("%s: model not found in %s\n", sc.String, path.GetChars());
+					}
+				}
+				else if (sc.Compare("animation"))
+				{
+					sc.MustGetString();
+					FixPathSeperator(sc.String);
+					smf.animationID = FindAnimation(path.GetChars(), sc.String);
+					if (smf.animationID == -1)
+					{
+						Printf("%s: animation not found in %s\n", sc.String, path.GetChars());
 					}
 				}
 				else if (sc.Compare("scale"))

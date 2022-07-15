@@ -229,6 +229,11 @@ static const char *shaderBindings = R"(
 	    vec4 lights[];
 	};
 
+	layout(set = 1, binding = 4, std430) buffer BonesSSO
+	{ 
+		mat4 boneMatrices[]; 
+	};
+
 	// textures
 	layout(set = 2, binding = 0) uniform sampler2D tex;
 	layout(set = 2, binding = 1) uniform sampler2D texture2;

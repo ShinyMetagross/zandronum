@@ -26,6 +26,8 @@
 **
 **/
 
+#include "hwrenderer/data/shaderuniforms.h"
+#include "gl_load/gl_system.h"
 #include "filesystem.h"
 #include "g_game.h"
 #include "doomstat.h"
@@ -141,3 +143,21 @@ void FHWModelRenderer::SetupFrame(FModel *model, unsigned int frame1, unsigned i
 	if (mdbuff->indexBuffer()) state.SetIndexBuffer(mdbuff->indexBuffer());
 }
 
+//===========================================================================
+//
+//
+//
+//===========================================================================
+
+void FHWModelRenderer::SetupBones(FModel *model, unsigned int frame1, unsigned int frame2, unsigned int size, const TArray<Matrix3x4> &bones)
+{
+	if (bones.Size() > 0)
+	{
+		if (bone_id == -1)
+			glGenBuffers(1, &bone_id);
+
+		glBindBufferBase(GL_UNIFORM_BUFFER, BONES_BINDINGPOINT, bone_id);
+		glBindBuffer(GL_UNIFORM_BUFFER, bone_id); // Note: Some older AMD drivers don't do that in glBindBufferBase, as they should.
+		glBufferData(GL_UNIFORM_BUFFER, bones.Size() * sizeof(Matrix3x4), &bones[0], GL_STREAM_DRAW);
+	}
+}

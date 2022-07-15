@@ -25,6 +25,7 @@ struct FSpriteModelFrame
 	TArray<FTextureID> skinIDs;
 	TArray<FTextureID> surfaceskinIDs;
 	TArray<int> modelframes;
+	int animationID;
 	float xscale, yscale, zscale;
 	// [BB] Added zoffset, rotation parameters and flags.
 	// Added xoffset, yoffset
@@ -81,4 +82,5 @@ private:
 
 int ModelFrameHash(FSpriteModelFrame* smf);
 unsigned FindModel(const char* path, const char* modelfile);
+unsigned FindAnimation(const char* path, const char* modelfile);
 

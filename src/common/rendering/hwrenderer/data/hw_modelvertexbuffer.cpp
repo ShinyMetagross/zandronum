@@ -48,9 +48,12 @@ FModelVertexBuffer::FModelVertexBuffer(bool needindex, bool singleframe)
 		{ 0, VATTR_NORMAL, VFmt_Packed_A2R10G10B10, (int)myoffsetof(FModelVertex, packedNormal) },
 		{ 0, VATTR_LIGHTMAP, VFmt_Float3, (int)myoffsetof(FModelVertex, lu) },
 		{ 1, VATTR_VERTEX2, VFmt_Float3, (int)myoffsetof(FModelVertex, x) },
-		{ 1, VATTR_NORMAL2, VFmt_Packed_A2R10G10B10, (int)myoffsetof(FModelVertex, packedNormal) }
+		{ 1, VATTR_NORMAL2, VFmt_Packed_A2R10G10B10, (int)myoffsetof(FModelVertex, packedNormal) },
+		{ 0, VATTR_BONEIDS, VFmt_Int4, (int)myoffsetof(FModelVertex, boneIDs[0])},
+		{ 0, VATTR_BONEWEIGHTS, VFmt_Float4, (int)myoffsetof(FModelVertex, boneWeights[0])}
+		
 	};
-	mVertexBuffer->SetFormat(2, 6, sizeof(FModelVertex), format);
+	mVertexBuffer->SetFormat(2, 8, sizeof(FModelVertex), format);
 }
 
 //===========================================================================
@@ -109,5 +112,3 @@ void FModelVertexBuffer::UnlockIndexBuffer()
 {
 	if (mIndexBuffer) mIndexBuffer->Unlock();
 }
-
-

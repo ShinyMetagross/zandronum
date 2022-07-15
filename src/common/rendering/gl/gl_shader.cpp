@@ -297,6 +297,11 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 		};
 		#endif
 
+		layout(std430, binding = 7) buffer BonesSSO 
+		{ 
+			mat4 boneMatrices[]; 
+		};
+
 		// textures
 		uniform sampler2D tex;
 		uniform sampler2D ShadowMap;

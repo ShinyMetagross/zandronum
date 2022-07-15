@@ -36,11 +36,11 @@
 #include "model_md2.h"
 #include "model_md3.h"
 #include "model_kvx.h"
+#include "model_smd.h"
 #include "i_time.h"
 #include "voxels.h"
 #include "texturemanager.h"
 #include "modelrenderer.h"
-
 
 TDeletingArray<FModel*> Models;
 TArray<FSpriteModelFrame> SpriteModelFrames;
@@ -206,6 +206,10 @@ unsigned FindModel(const char * path, const char * modelfile)
 	{
 		model = new FMD3Model;
 	}
+	else if (!memcmp(buffer, "version 1", 9))
+	{
+		model = new FSMDModel;
+	}
 
 	if (model != nullptr)
 	{
@@ -232,5 +236,58 @@ unsigned FindModel(const char * path, const char * modelfile)
 	// The vertex buffer cannot be initialized here because this gets called before OpenGL is initialized
 	model->mFileName = fullname;
 	return Models.Push(model);
+}
+
+//===========================================================================
+//
+// FindModel
+//
+//===========================================================================
+
+unsigned FindAnimation(const char* path, const char* modelfile)
+{
+	FSMDModel* model = nullptr;
+	FString fullname;
+
+	fullname.Format("%s%s", path, modelfile);
+	int lump = fileSystem.CheckNumForFullName(fullname);
+
+	if (lump < 0)
+	{
+		Printf("FindAnimation: '%s' not found\n", fullname.GetChars());
+		return -1;
+	}
+
+	for (unsigned i = 0; i < animationClips.Size(); i++)
+	{
+		if (!animationClips[i]->mFileName.CompareNoCase(fullname)) return i;
+	}
+
+	int len = fileSystem.FileLength(lump);
+	FileData lumpd = fileSystem.ReadFile(lump);
+	char* buffer = (char*)lumpd.GetMem();
+
+	if (!memcmp(buffer, "version 1", 9))
+		model = new FSMDModel();
+	else
+		return -1;
+
+	if (model != nullptr)
+	{
+		if (!model->Load(path, lump, buffer, len))
+		{
+			delete model;
+			return -1;
+		}
+	}
+	else
+	{
+		Printf("LoadAnimation: Unknown model format in '%s'\n", fullname.GetChars());
+		return -1;
+	}
+
+	// The vertex buffer cannot be initialized here because this gets called before OpenGL is initialized
+	model->mFileName = fullname;
+	return animationClips.Push(model);
 }
 

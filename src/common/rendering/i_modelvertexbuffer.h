@@ -9,6 +9,8 @@ struct FModelVertex
 	unsigned packedNormal;	// normal vector as GL_INT_2_10_10_10_REV.
 	float lu, lv;	// lightmap texture coordinates
 	float lindex;	// lightmap texture index
+	int boneIDs[4];
+	float boneWeights[4];
 
 	void Set(float xx, float yy, float zz, float uu, float vv)
 	{
@@ -29,6 +31,16 @@ struct FModelVertex
 		int inz = clamp(int(nz * 512), -512, 511);
 		int inw = 0;
 		packedNormal = (inw << 30) | ((inz & 1023) << 20) | ((iny & 1023) << 10) | (inx & 1023);
+	}
+
+	void SetBone(int bone, int index)
+	{
+		boneIDs[index] = bone;
+	}
+
+	void SetWeight(float weight, int index)
+	{
+		boneWeights[index] = weight;
 	}
 };
 

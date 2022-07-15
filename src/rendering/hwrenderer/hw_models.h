@@ -41,6 +41,7 @@ class FHWModelRenderer : public FModelRenderer
 	int modellightindex = -1;
 	HWDrawInfo *di;
 	FRenderState &state;
+	uint32_t bone_id = 0;
 public:
 	FHWModelRenderer(HWDrawInfo *d, FRenderState &st, int mli) : modellightindex(mli), di(d), state(st)
 	{}
@@ -56,6 +57,6 @@ public:
 	void DrawArrays(int start, int count) override;
 	void DrawElements(int numIndices, size_t offset) override;
 	void SetupFrame(FModel *model, unsigned int frame1, unsigned int frame2, unsigned int size) override;
-
+	void SetupBones(FModel *model, unsigned int frame1, unsigned int frame2, unsigned int size, const TArray<Matrix3x4>& bones);
 };
 
