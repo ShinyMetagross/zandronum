@@ -258,7 +258,7 @@ void FUE1Model::RenderFrame( FModelRenderer *renderer, FGameTexture *skin, int f
 		// TODO: Handle per-group render styles and other flags once functions for it are implemented
 		// Future note: poly renderstyles should always be enforced unless the actor itself has a style other than Normal
 		renderer->SetMaterial(sskin,false,translation);
-		renderer->SetupFrame(this, vofs+frame*fsize,vofs+frame2*fsize,vsize);
+		renderer->SetupFrame(this, vofs + frame * fsize, vofs + frame2 * fsize, vsize, {});
 		renderer->DrawArrays(0,vsize);
 		vofs += vsize;
 	}

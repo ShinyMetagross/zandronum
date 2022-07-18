@@ -122,7 +122,7 @@ protected:
 
 class IHardwareTexture;
 class FTexture;
-
+class BoneBuffer;
 
 class DFrameBuffer
 {
@@ -143,6 +143,7 @@ public:
 	FFlatVertexBuffer *mVertexData = nullptr;	// Global vertex data
 	HWViewpointBuffer *mViewpoints = nullptr;	// Viewpoint render data.
 	FLightBuffer *mLights = nullptr;			// Dynamic lights
+	BoneBuffer* mBones = nullptr;				// Model bones
 	IShadowMap mShadowMap;
 
 	IntRect mScreenViewport;

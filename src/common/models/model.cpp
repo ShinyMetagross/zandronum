@@ -36,11 +36,8 @@
 #include "model_md2.h"
 #include "model_md3.h"
 #include "model_kvx.h"
-<<<<<<< Updated upstream
-=======
 #include "model_smd.h"
 #include "model_iqm.h"
->>>>>>> Stashed changes
 #include "i_time.h"
 #include "voxels.h"
 #include "texturemanager.h"
@@ -211,8 +208,6 @@ unsigned FindModel(const char * path, const char * modelfile)
 	{
 		model = new FMD3Model;
 	}
-<<<<<<< Updated upstream
-=======
 	else if (!memcmp(buffer, "version 1", 9))
 	{
 		model = new FSMDModel;
@@ -221,7 +216,6 @@ unsigned FindModel(const char * path, const char * modelfile)
 	{
 		model = new IQMModel;
 	}
->>>>>>> Stashed changes
 
 	if (model != nullptr)
 	{

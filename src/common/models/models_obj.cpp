@@ -658,7 +658,7 @@ void FOBJModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int f
 		}
 
 		renderer->SetMaterial(userSkin, false, translation);
-		renderer->SetupFrame(this, surf->vbStart, surf->vbStart, surf->numTris * 3);
+		renderer->SetupFrame(this, surf->vbStart, surf->vbStart, surf->numTris * 3, {});
 		renderer->DrawArrays(0, surf->numTris * 3);
 	}
 }

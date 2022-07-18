@@ -37,6 +37,7 @@
 #include "flatvertices.h"
 #include "hwrenderer/data/shaderuniforms.h"
 #include "hw_lightbuffer.h"
+#include "hw_bonebuffer.h"
 #include "hwrenderer/postprocessing/hw_postprocess.h"
 
 #include "poly_framebuffer.h"
@@ -97,6 +98,7 @@ void PolyFrameBuffer::InitializeState()
 	mSkyData = new FSkyVertexBuffer;
 	mViewpoints = new HWViewpointBuffer;
 	mLights = new FLightBuffer();
+	mBones = new BoneBuffer();
 
 	static const FVertexBufferAttribute format[] =
 	{

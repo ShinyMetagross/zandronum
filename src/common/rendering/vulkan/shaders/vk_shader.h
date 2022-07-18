@@ -50,8 +50,11 @@ struct PushConstants
 	// Blinn glossiness and specular level
 	FVector2 uSpecularMaterial;
 
+	// bone animation
+	int uBoneIndexBase;
+
 	int uDataIndex;
-	int padding1, padding2, padding3;
+	int padding2, padding3;
 };
 
 class VkShaderProgram

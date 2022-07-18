@@ -49,6 +49,7 @@
 #include "hw_skydome.h"
 #include "hw_viewpointbuffer.h"
 #include "hw_lightbuffer.h"
+#include "hw_bonebuffer.h"
 #include "gl_shaderprogram.h"
 #include "gl_debug.h"
 #include "r_videoscale.h"
@@ -171,6 +172,7 @@ void OpenGLFrameBuffer::InitializeState()
 	mSkyData = new FSkyVertexBuffer;
 	mViewpoints = new HWViewpointBuffer(screen->mPipelineNbr);
 	mLights = new FLightBuffer(screen->mPipelineNbr);
+	mBones = new BoneBuffer(screen->mPipelineNbr);
 	GLRenderer = new FGLRenderer(this);
 	GLRenderer->Initialize(GetWidth(), GetHeight());
 	static_cast<GLDataBuffer*>(mLights->GetBuffer())->BindBase();
