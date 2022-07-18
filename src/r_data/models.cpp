@@ -43,6 +43,7 @@
 #include "i_time.h"
 #include "texturemanager.h"
 #include "modelrenderer.h"
+#include "model_smd.h"
 
 
 #ifdef _MSC_VER
@@ -309,6 +310,7 @@ static void ParseModelDefLump(int Lump);
 void InitModels()
 {
 	Models.DeleteAndClear();
+	animationClips.Clear();
 	SpriteModelFrames.Clear();
 	SpriteModelHash.Clear();
 
@@ -393,6 +395,7 @@ static void ParseModelDefLump(int Lump)
 			FSpriteModelFrame smf;
 			memset(&smf, 0, sizeof(smf));
 			smf.xscale=smf.yscale=smf.zscale=1.f;
+			smf.animationID = -1;
 
 			auto type = PClass::FindClass(sc.String);
 			if (!type || type->Defaults == nullptr)
@@ -463,6 +466,16 @@ static void ParseModelDefLump(int Lump)
 					if (smf.modelIDs[index] == -1)
 					{
 						Printf("%s: model not found in %s\n", sc.String, path.GetChars());
+					}
+				}
+				else if (sc.Compare("animation"))
+				{
+					sc.MustGetString();
+					FixPathSeperator(sc.String);
+					smf.animationID = FindAnimation(path.GetChars(), sc.String);
+					if (smf.animationID == -1)
+					{
+						Printf("%s: animation not found in %s\n", sc.String, path.GetChars());
 					}
 				}
 				else if (sc.Compare("scale"))

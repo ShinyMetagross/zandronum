@@ -1105,6 +1105,11 @@ set (PCH_SOURCES
 	common/models/models_voxel.cpp
 	common/models/models_ue1.cpp
 	common/models/models_obj.cpp
+<<<<<<< Updated upstream
+=======
+	common/models/models_smd.cpp
+	common/models/models_iqm.cpp
+>>>>>>> Stashed changes
 	common/models/model.cpp
 	common/models/voxels.cpp
 	common/console/c_commandline.cpp
