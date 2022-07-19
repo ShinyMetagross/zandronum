@@ -25,7 +25,6 @@ struct FSpriteModelFrame
 	TArray<FTextureID> skinIDs;
 	TArray<FTextureID> surfaceskinIDs;
 	TArray<int> modelframes;
-	int animationID;
 	float xscale, yscale, zscale;
 	// [BB] Added zoffset, rotation parameters and flags.
 	// Added xoffset, yoffset
@@ -64,6 +63,7 @@ public:
 	virtual void RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, int translation=0) = 0;
 	virtual void BuildVertexBuffer(FModelRenderer *renderer) = 0;
 	virtual void AddSkins(uint8_t *hitlist) = 0;
+	virtual bool AttachAnimations(int id) = 0;
 	virtual float getAspectFactor(float vscale) { return 1.f; }
 
 	void SetVertexBuffer(int type, IModelVertexBuffer *buffer) { mVBuf[type] = buffer; }
@@ -82,5 +82,5 @@ private:
 
 int ModelFrameHash(FSpriteModelFrame* smf);
 unsigned FindModel(const char* path, const char* modelfile);
-unsigned FindAnimation(const char* path, const char* modelfile);
+bool FindAnimation(const char* path, const char* modelfile, const TArray<int> modelnum);
 

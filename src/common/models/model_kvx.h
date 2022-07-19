@@ -64,6 +64,7 @@ public:
 	FTextureID GetPaletteTexture() const { return mPalette; }
 	void BuildVertexBuffer(FModelRenderer *renderer) override;
 	float getAspectFactor(float vscale) override;
+	virtual bool AttachAnimations(int id) override;
 };
 
 

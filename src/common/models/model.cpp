@@ -250,9 +250,9 @@ unsigned FindModel(const char * path, const char * modelfile)
 //
 //===========================================================================
 
-unsigned FindAnimation(const char* path, const char* modelfile)
+bool FindAnimation(const char* path, const char* modelfile, const TArray<int> modelnum)
 {
-	FSMDModel* model = nullptr;
+	FModel* model = nullptr;
 	FString fullname;
 
 	fullname.Format("%s%s", path, modelfile);
@@ -261,12 +261,7 @@ unsigned FindAnimation(const char* path, const char* modelfile)
 	if (lump < 0)
 	{
 		Printf("FindAnimation: '%s' not found\n", fullname.GetChars());
-		return -1;
-	}
-
-	for (unsigned i = 0; i < animationClips.Size(); i++)
-	{
-		if (!animationClips[i]->mFileName.CompareNoCase(fullname)) return i;
+		return false;
 	}
 
 	int len = fileSystem.FileLength(lump);
@@ -276,23 +271,32 @@ unsigned FindAnimation(const char* path, const char* modelfile)
 	if (!memcmp(buffer, "version 1", 9))
 		model = new FSMDModel();
 	else
-		return -1;
+		return false;
 
 	if (model != nullptr)
 	{
 		if (!model->Load(path, lump, buffer, len))
 		{
 			delete model;
-			return -1;
+			return false;
 		}
 	}
 	else
 	{
 		Printf("LoadAnimation: Unknown model format in '%s'\n", fullname.GetChars());
-		return -1;
+		return false;
 	}
 
 	// The vertex buffer cannot be initialized here because this gets called before OpenGL is initialized
 	model->mFileName = fullname;
-	return animationClips.Push(model);
+	for (unsigned i = 0; i < modelnum.Size(); i++)
+	{
+		//if (!Models[i]->mFileName.CompareNoCase(fullname)) return false;
+		if (modelnum[i] >= 0)
+		{
+			FModel* attachtoModel = Models[modelnum[i]];
+			attachtoModel->AttachAnimations(Models.Push(model));
+		}
+	}
+	return true;
 }

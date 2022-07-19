@@ -310,7 +310,6 @@ static void ParseModelDefLump(int Lump);
 void InitModels()
 {
 	Models.DeleteAndClear();
-	animationClips.Clear();
 	SpriteModelFrames.Clear();
 	SpriteModelHash.Clear();
 
@@ -395,7 +394,6 @@ static void ParseModelDefLump(int Lump)
 			FSpriteModelFrame smf;
 			memset(&smf, 0, sizeof(smf));
 			smf.xscale=smf.yscale=smf.zscale=1.f;
-			smf.animationID = -1;
 
 			auto type = PClass::FindClass(sc.String);
 			if (!type || type->Defaults == nullptr)
@@ -472,8 +470,13 @@ static void ParseModelDefLump(int Lump)
 				{
 					sc.MustGetString();
 					FixPathSeperator(sc.String);
-					smf.animationID = FindAnimation(path.GetChars(), sc.String);
-					if (smf.animationID == -1)
+
+					if (smf.modelIDs.Size() < 1)
+					{
+						sc.ScriptError("No models found to attach animation %s to %s", sc.String, type->TypeName.GetChars());
+					}
+
+					if(!FindAnimation(path.GetChars(), sc.String, smf.modelIDs))
 					{
 						Printf("%s: animation not found in %s\n", sc.String, path.GetChars());
 					}

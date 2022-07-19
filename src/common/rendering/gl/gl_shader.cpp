@@ -303,7 +303,7 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 
 		// bone matrix buffers
 		#ifdef SHADER_STORAGE_BONES
-		layout(std430, binding = 1) buffer BoneBufferSSO
+		layout(std430, binding = 7) buffer BoneBufferSSO
 		{
 			mat4 bones[];
 		};
@@ -392,7 +392,7 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 	unsigned int lightbuffersize = screen->mLights->GetBlockSize();
 	if (!lightbuffertype)
 	{
-		vp_comb.Format("#version 330 core\n#define NUM_UBO_LIGHTS %d\n#define NUM_UBO_LIGHTS %d\n", lightbuffersize, screen->mBones->GetBlockSize());
+		vp_comb.Format("#version 330 core\n#define NUM_UBO_LIGHTS %d\n#define NUM_UBO_BONES %d\n", lightbuffersize, screen->mBones->GetBlockSize());
 	}
 	else
 	{

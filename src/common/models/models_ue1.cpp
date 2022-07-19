@@ -319,3 +319,8 @@ FUE1Model::~FUE1Model()
 {
 	UnloadGeometry();
 }
+
+bool FUE1Model::AttachAnimations(int id)
+{
+	return false;
+}

@@ -71,5 +71,6 @@ public:
 	void LoadGeometry();
 	void BuildVertexBuffer(FModelRenderer *renderer);
 	virtual void AddSkins(uint8_t *hitlist);
+	virtual bool AttachAnimations(int id) override;
 };
 

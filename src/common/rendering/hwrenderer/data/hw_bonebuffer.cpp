@@ -83,12 +83,12 @@ int BoneBuffer::UploadBones(const TArray<VSMatrix>& bones)
 		totalsize = mMaxUploadSize;
 	}
 
-	float *mBufferPointer = (float*)mBuffer->Memory();
+	uint8_t *mBufferPointer = (uint8_t*)mBuffer->Memory();
 	assert(mBufferPointer != nullptr);
 	if (mBufferPointer == nullptr) return -1;
 	if (totalsize <= 0) return -1;	// there are no bones
 
-	unsigned thisindex = mIndex.fetch_add(totalsize);
+	unsigned int thisindex = mIndex.fetch_add(totalsize);
 
 	if (thisindex + totalsize <= mBufferSize)
 	{

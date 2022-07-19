@@ -1,11 +1,12 @@
 #pragma once
 #include "model.h"
+#include "vectors.h"
+#include "matrix.h"
 #include "filesystem.h"
 
 #define SMD_HEADER	"version 1"
 
 class FSMDModel;
-extern TDeletingArray<FSMDModel*> animationClips;
 
 class FSMDModel : public FModel
 {
@@ -31,9 +32,8 @@ class FSMDModel : public FModel
 	struct SMDTriangle
 	{
 		FString surface;
-		unsigned int parentBone[3];
-		float posX[3], posY[3], posZ[3], normX[3], normY[3], normZ[3], uvX[3], uvY[3];
-		unsigned int boneID[3];
+		unsigned int parentBone[3], boneID[3][3];
+		float posX[3], posY[3], posZ[3], normX[3], normY[3], normZ[3], uvX[3], uvY[3], weight[4][3];
 	};
 
 	//SMD doesn't have groups. But we need to create artifical ones.
@@ -43,11 +43,19 @@ class FSMDModel : public FModel
 		TArray<SMDTriangle> groupTriangles;
 	};
 
-	TArray<SMDGroup>	groups;
-	TArray<SMDTriangle> SMDTriangles;
-	TArray<SMDNode>		SMDNodes;
-	TArray<FString>		surfaceSkins;
-	TArray<SMDSkeletonFrame> SMDSkeleton;
+	struct SMDAnimation
+	{
+		FString name;
+		TArray<SMDSkeletonFrame> SMDSkeleton;
+	};
+
+	TArray<SMDGroup>		groups;
+	TArray<SMDTriangle>		SMDTriangles;
+	TArray<SMDNode>			SMDNodes;
+	TArray<FString>			surfaceSkins;
+	TArray<SMDAnimation>	animations;
+	TArray<VSMatrix>		frameMatrices;
+	TArray<int>				animLookups;
 	int mLumpNum;
 	int Triangles = 0;
 	int Frames = 0;
@@ -62,5 +70,5 @@ public:
 	void LoadGeometry();
 	void BuildVertexBuffer(FModelRenderer* renderer);
 	virtual void AddSkins(uint8_t* hitlist);
-	void LoadAnimations();
+	virtual bool AttachAnimations(int id);
 };

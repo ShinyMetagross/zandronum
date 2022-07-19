@@ -702,3 +702,8 @@ FOBJModel::~FOBJModel()
 	faces.Clear();
 	surfaces.Clear();
 }
+
+bool FOBJModel::AttachAnimations(int id)
+{
+	return false;
+}

@@ -381,6 +381,11 @@ void FDMDModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int f
 	renderer->SetInterpolation(0.f);
 }
 
+bool FDMDModel::AttachAnimations(int id)
+{
+	return false;
+}
+
 
 
 //===========================================================================
@@ -551,5 +556,10 @@ void FMD2Model::LoadGeometry()
 
 FMD2Model::~FMD2Model()
 {
+}
+
+bool FMD2Model::AttachAnimations(int id)
+{
+	return false;
 }
 

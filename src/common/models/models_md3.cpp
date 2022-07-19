@@ -384,3 +384,14 @@ void FMD3Model::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int f
 	renderer->SetInterpolation(0.f);
 }
 
+//===========================================================================
+//
+//
+//
+//===========================================================================
+
+bool FMD3Model::AttachAnimations(int id)
+{
+	return false;
+}
+

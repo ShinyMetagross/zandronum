@@ -152,14 +152,14 @@ std::unique_ptr<VulkanRenderPass> VkRenderPassSetup::CreateRenderPass(int clearT
 	for (int i = 1; i < PassKey.DrawBuffers; i++)
 	{
 		builder.AddAttachment(
-			drawBufferFormats[i], buffers->GetSceneSamples(),
+			drawBufferFormats[i], (VkSampleCountFlagBits)PassKey.Samples,
 			(clearTargets & CT_Color) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE,
 			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	}
 	if (PassKey.DepthStencil)
 	{
 		builder.AddDepthStencilAttachment(
-			buffers->SceneDepthStencilFormat, PassKey.DrawBufferFormat == VK_FORMAT_R8G8B8A8_UNORM ? VK_SAMPLE_COUNT_1_BIT : buffers->GetSceneSamples(),
+			buffers->SceneDepthStencilFormat, (VkSampleCountFlagBits)PassKey.Samples,
 			(clearTargets & CT_Depth) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE,
 			(clearTargets & CT_Stencil) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD, VK_ATTACHMENT_STORE_OP_STORE,
 			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -230,7 +230,8 @@ std::unique_ptr<VulkanPipeline> VkRenderPassSetup::CreatePipeline(const VkPipeli
 		VK_FORMAT_R32G32_SFLOAT,
 		VK_FORMAT_R32_SFLOAT,
 		VK_FORMAT_R8G8B8A8_UNORM,
-		VK_FORMAT_A2B10G10R10_SNORM_PACK32
+		VK_FORMAT_A2B10G10R10_SNORM_PACK32,
+		VK_FORMAT_R8G8B8A8_UINT
 	};
 
 	bool inputLocations[VATTR_MAX] = {};
@@ -246,7 +247,7 @@ std::unique_ptr<VulkanPipeline> VkRenderPassSetup::CreatePipeline(const VkPipeli
 	for (int i = 0; i < VATTR_MAX; i++)
 	{
 		if (!inputLocations[i])
-			builder.AddVertexAttribute(i, 0, i != 8 ? VK_FORMAT_R32G32B32_SFLOAT : VK_FORMAT_R8G8B8A8_SINT, 0);
+			builder.AddVertexAttribute(i, 0, i != 8 ? VK_FORMAT_R32G32B32_SFLOAT : VK_FORMAT_R8G8B8A8_UINT, 0);
 	}
 
 	builder.AddDynamicState(VK_DYNAMIC_STATE_VIEWPORT);

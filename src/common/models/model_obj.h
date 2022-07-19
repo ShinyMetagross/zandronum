@@ -101,6 +101,7 @@ public:
 	void RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame, int frame2, double inter, int translation=0) override;
 	void BuildVertexBuffer(FModelRenderer* renderer) override;
 	void AddSkins(uint8_t* hitlist) override;
+	virtual bool AttachAnimations(int id) override;
 };
 
 #endif

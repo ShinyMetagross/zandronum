@@ -31,6 +31,7 @@ public:
 	void AddSkins(uint8_t *hitlist) override;
 	void LoadGeometry();
 	void UnloadGeometry();
+	virtual bool AttachAnimations(int id) override;
 	FUE1Model()
 	{
 		mDataLump = -1;

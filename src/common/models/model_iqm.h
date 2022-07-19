@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "model.h"
 #include "vectors.h"
+#include "matrix.h"
 #include "common/rendering/i_modelvertexbuffer.h"
 
 struct IQMMesh
@@ -64,15 +65,15 @@ struct IQMJoint
 {
 	FString Name;
 	int32_t Parent; // parent < 0 means this is a root bone
-	float Translate[3];
-	float Quaternion[4];
-	float Scale[3];
+	FVector3 Translate;
+	FVector4 Quaternion;
+	FVector3 Scale;
 };
 
 struct IQMPose
 {
 	int32_t Parent; // parent < 0 means this is a root bone
-	uint32_t Channelmask; // mask of which 10 channels are present for this joint pose
+	uint32_t ChannelMask; // mask of which 10 channels are present for this joint pose
 	float ChannelOffset[10];
 	float ChannelScale[10];
 	// channels 0..2 are translation <Tx, Ty, Tz> and channels 3..6 are quaternion rotation <Qx, Qy, Qz, Qw>
@@ -98,6 +99,8 @@ struct IQMBounds
 	float Radius;
 };
 
+class IQMFileReader;
+
 class IQMModel : public FModel
 {
 public:
@@ -109,9 +112,17 @@ public:
 	void RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame, int frame2, double inter, int translation = 0) override;
 	void BuildVertexBuffer(FModelRenderer* renderer) override;
 	void AddSkins(uint8_t* hitlist) override;
+	virtual bool AttachAnimations(int id) override;
 
+private:
 	void LoadGeometry();
 	void UnloadGeometry();
+
+	void LoadPosition(IQMFileReader& reader, const IQMVertexArray& vertexArray);
+	void LoadTexcoord(IQMFileReader& reader, const IQMVertexArray& vertexArray);
+	void LoadNormal(IQMFileReader& reader, const IQMVertexArray& vertexArray);
+	void LoadBlendIndexes(IQMFileReader& reader, const IQMVertexArray& vertexArray);
+	void LoadBlendWeights(IQMFileReader& reader, const IQMVertexArray& vertexArray);
 
 	int mLumpNum = -1;
 	TArray<IQMMesh> Meshes;
@@ -120,10 +131,86 @@ public:
 	TArray<IQMJoint> Joints;
 	TArray<IQMPose> Poses;
 	TArray<IQMAnim> Anims;
-	TArray<uint16_t> Frames;
+	TArray<VSMatrix> FrameTransforms;
 	TArray<IQMBounds> Bounds;
 	TArray<IQMVertexArray> VertexArrays;
 	uint32_t NumVertices = 0;
 
 	TArray<FModelVertex> Vertices;
+};
+
+struct IQMReadErrorException { };
+
+class IQMFileReader
+{
+public:
+	IQMFileReader(const void* buffer, int length) : buffer((const char*)buffer), length(length) { }
+
+	uint8_t ReadUByte()
+	{
+		uint8_t value;
+		Read(&value, sizeof(uint8_t));
+		return value;
+	}
+
+	int32_t ReadInt32()
+	{
+		int32_t value;
+		Read(&value, sizeof(int32_t));
+		value = LittleLong(value);
+		return value;
+	}
+
+	int16_t ReadInt16()
+	{
+		int16_t value;
+		Read(&value, sizeof(int16_t));
+		value = LittleShort(value);
+		return value;
+	}
+
+	uint32_t ReadUInt32()
+	{
+		return ReadInt32();
+	}
+
+	uint16_t ReadUInt16()
+	{
+		return ReadInt16();
+	}
+
+	float ReadFloat()
+	{
+		float value;
+		Read(&value, sizeof(float));
+		return value;
+	}
+
+	FString ReadName(const TArray<char>& textBuffer)
+	{
+		uint32_t nameOffset = ReadUInt32();
+		if (nameOffset >= textBuffer.Size())
+			throw IQMReadErrorException();
+		return textBuffer.Data() + nameOffset;
+	}
+
+	void Read(void* data, int size)
+	{
+		if (pos + size > length || size < 0 || size > 0x0fffffff)
+			throw IQMReadErrorException();
+		memcpy(data, buffer + pos, size);
+		pos += size;
+	}
+
+	void SeekTo(int newPos)
+	{
+		if (newPos < 0 || newPos > length)
+			throw IQMReadErrorException();
+		pos = newPos;
+	}
+
+private:
+	const char* buffer = nullptr;
+	int length = 0;
+	int pos = 0;
 };

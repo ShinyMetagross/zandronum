@@ -99,6 +99,7 @@ VulkanFrameBuffer::~VulkanFrameBuffer()
 	delete mSkyData;
 	delete mViewpoints;
 	delete mLights;
+	delete mBones;
 	mShadowMap.Reset();
 
 	if (mDescriptorSetManager)

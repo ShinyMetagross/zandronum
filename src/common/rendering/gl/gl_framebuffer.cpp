@@ -105,6 +105,7 @@ OpenGLFrameBuffer::~OpenGLFrameBuffer()
 	if (mSkyData != nullptr) delete mSkyData;
 	if (mViewpoints != nullptr) delete mViewpoints;
 	if (mLights != nullptr) delete mLights;
+	if (mBones != nullptr) delete mBones;
 	mShadowMap.Reset();
 
 	if (GLRenderer)
@@ -176,6 +177,7 @@ void OpenGLFrameBuffer::InitializeState()
 	GLRenderer = new FGLRenderer(this);
 	GLRenderer->Initialize(GetWidth(), GetHeight());
 	static_cast<GLDataBuffer*>(mLights->GetBuffer())->BindBase();
+	static_cast<GLDataBuffer*>(mBones->GetBuffer())->BindBase();
 
 	mDebug = std::make_unique<FGLDebug>();
 	mDebug->Update();

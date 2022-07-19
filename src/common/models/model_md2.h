@@ -116,6 +116,7 @@ public:
 	virtual void RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, int translation=0);
 	virtual void LoadGeometry();
 	virtual void AddSkins(uint8_t *hitlist);
+	virtual bool AttachAnimations(int id) override;
 
 	void UnloadGeometry();
 	void BuildVertexBuffer(FModelRenderer *renderer);
@@ -131,7 +132,7 @@ public:
 
 	virtual bool Load(const char * fn, int lumpnum, const char * buffer, int length);
 	virtual void LoadGeometry();
-
+	virtual bool AttachAnimations(int id) override;
 };
 
 

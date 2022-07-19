@@ -407,3 +407,13 @@ void FVoxelModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int
 	renderer->DrawElements(mNumIndices, 0);
 }
 
+//===========================================================================
+//
+// Voxels don't have animations
+//
+//===========================================================================
+
+bool FVoxelModel::AttachAnimations(int id)
+{
+	return false;
+}
