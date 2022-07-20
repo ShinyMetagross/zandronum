@@ -224,7 +224,8 @@ void FSMDModel::LoadGeometry()
 	}
 
 	int matrixCounter = 0;
-	frameMatrices.Resize(animations.Size()*amountofFrames*SMDNodes.Size());
+	
+	frameMatrices.Resize(amountofFrames*SMDNodes.Size());
 	for (unsigned i = 0; i < animations.Size(); i++)
 	{
 		for (unsigned j = 0; j < animations[i].SMDSkeleton.Size(); j++)
@@ -267,6 +268,7 @@ void FSMDModel::LoadGeometry()
 			}
 		}
 	}
+	Printf("%d\n", matrixCounter);
 
 	mLoaded = true;
 }
