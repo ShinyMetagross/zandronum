@@ -185,6 +185,10 @@ void FSMDModel::LoadGeometry()
 		}
 	}
 
+	int amountofFrames = 0;
+	for (unsigned i = 0; i < animations.Size(); i++)
+		amountofFrames += animations[i].SMDSkeleton.Size();
+
 	TArray<VSMatrix> baseframe(SMDNodes.Size(), true);
 	TArray<VSMatrix> inversebaseframe(SMDNodes.Size(), true);
 	for (uint32_t i = 0; i < SMDNodes.Size(); i++)
@@ -194,7 +198,16 @@ void FSMDModel::LoadGeometry()
 		VSMatrix m, invm;
 		m.loadIdentity();
 		m.translate(n.posX, n.posY, n.posZ);
-		//m.multQuaternion(j.Quaternion);
+
+		FVector3 eulerRotation;
+		eulerRotation.X = n.rotX;
+		eulerRotation.Y = n.rotY;
+		eulerRotation.Z = n.rotZ;
+
+		FVector4 quaternion;
+		quaternion.ToQuaternion(eulerRotation);
+		m.multQuaternion(quaternion);
+
 		m.inverseMatrix(invm);
 		if (SMDNodes[i].parentID >= 0)
 		{
@@ -209,11 +222,8 @@ void FSMDModel::LoadGeometry()
 			inversebaseframe[i] = invm;
 		}
 	}
-	
-	int amountofFrames = 0;
-	for (unsigned i = 0; i < animations.Size(); i++)
-		amountofFrames += animations[i].SMDSkeleton.Size();
 
+	int matrixCounter = 0;
 	frameMatrices.Resize(animations.Size()*amountofFrames*SMDNodes.Size());
 	for (unsigned i = 0; i < animations.Size(); i++)
 	{
@@ -221,27 +231,19 @@ void FSMDModel::LoadGeometry()
 		{
 			for (unsigned k = 0; k < animations[i].SMDSkeleton[j].skeletonNodes.Size(); k++)
 			{
+				matrixCounter++;
 				FVector3 translate;
 				translate.X = animations[0].SMDSkeleton[0].skeletonNodes[k].posX; translate.X += animations[i].SMDSkeleton[j].skeletonNodes[k].posX;
 				translate.Y = animations[0].SMDSkeleton[0].skeletonNodes[k].posY; translate.Y += animations[i].SMDSkeleton[j].skeletonNodes[k].posY;
 				translate.Z = animations[0].SMDSkeleton[0].skeletonNodes[k].posZ; translate.Z += animations[i].SMDSkeleton[j].skeletonNodes[k].posZ;
 
+				FVector3 eulerRotation;
+				eulerRotation.X = animations[0].SMDSkeleton[0].skeletonNodes[k].rotX; eulerRotation.X += animations[i].SMDSkeleton[j].skeletonNodes[k].rotX;
+				eulerRotation.Y = animations[0].SMDSkeleton[0].skeletonNodes[k].rotY; eulerRotation.Y += animations[i].SMDSkeleton[j].skeletonNodes[k].rotY;
+				eulerRotation.Z = animations[0].SMDSkeleton[0].skeletonNodes[k].rotZ; eulerRotation.Z += animations[i].SMDSkeleton[j].skeletonNodes[k].rotZ;
+
 				FVector4 quaternion;
-				float rotX = animations[0].SMDSkeleton[0].skeletonNodes[k].rotX; rotX += animations[i].SMDSkeleton[j].skeletonNodes[k].rotX;
-				float rotY = animations[0].SMDSkeleton[0].skeletonNodes[k].rotZ; rotY += animations[i].SMDSkeleton[j].skeletonNodes[k].rotY;
-				float rotZ = animations[0].SMDSkeleton[0].skeletonNodes[k].rotY; rotZ += animations[i].SMDSkeleton[j].skeletonNodes[k].rotZ;
-
-				float cy = cos(rotZ * 0.5);
-				float sy = sin(rotZ * 0.5);
-				float cp = cos(rotY * 0.5);
-				float sp = sin(rotY * 0.5);
-				float cr = cos(rotX * 0.5);
-				float sr = sin(rotX * 0.5);
-
-				quaternion.X = sr * cp * cy - cr * sp * sy;
-				quaternion.Y = cr * cp * sy - sr * sp * cy;
-				quaternion.Z = cr * cp * cy + sr * sp * sy;
-				quaternion.W = sr * cp * cy - cr * sp * sy;
+				quaternion.ToQuaternion(eulerRotation);
 				quaternion.MakeUnit();
 
 				VSMatrix m;
@@ -249,7 +251,7 @@ void FSMDModel::LoadGeometry()
 				m.translate(translate.X, translate.Y, translate.Z);
 				m.multQuaternion(quaternion);
 
-				VSMatrix& result = frameMatrices[i * amountofFrames + k];
+				VSMatrix& result = frameMatrices[matrixCounter];
 
 				if (SMDNodes[k].parentID >= 0)
 				{
@@ -290,6 +292,10 @@ void FSMDModel::BuildVertexBuffer(FModelRenderer* renderer)
 				vert->Set(tri.posX[j], tri.posZ[j], tri.posY[j], tri.uvX[j], tri.uvY[j]);
 				vert->SetNormal(tri.normX[j], tri.normZ[j], tri.normY[j]);
 				vert->SetBoneSelector(tri.parentBone[j], tri.boneID[0][j], tri.boneID[1][j], tri.boneID[2][j]);
+				vert->SetBoneWeight((int)clamp((1.0 - tri.weight[0][j] - tri.weight[1][j] - tri.weight[2][j]) * 255.0, 0.0, 255.0),
+					(int)clamp(tri.weight[0][j] * 255.0, 0.0, 255.0),
+					(int)clamp(tri.weight[1][j] * 255.0, 0.0, 255.0),
+					(int)clamp(tri.weight[2][j] * 255.0, 0.0, 255.0));
 			}
 		}
 		vbuf->UnlockVertexBuffer();
@@ -320,6 +326,42 @@ int FSMDModel::FindFrame(const char* name)
 void FSMDModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frameno, int frameno2, double inter, int translation)
 {
 	int numbones = SMDNodes.Size();
+
+	int offset1 = frameno * numbones;
+	int offset2 = frameno2 * numbones;
+	float t = (float)inter;
+	float invt = 1.0f - t;
+
+	frameno = clamp(frameno, 0, (int)frameMatrices.Size() - 1);
+	frameno2 = clamp(frameno2, 0, (int)frameMatrices.Size() - 1);
+
+	TArray<VSMatrix> bones(numbones, true);
+	for (int i = 0; i < numbones; i++)
+	{
+		const float* from = frameMatrices[offset1 + i].get();
+		const float* to = frameMatrices[offset2 + i].get();
+
+		// Interpolate bone between the two frames
+		float bone[16];
+		for (int i = 0; i < 16; i++)
+		{
+			bone[i] = from[i] * invt + to[i] * t;
+		}
+
+		// Apply parent bone
+		if (SMDNodes[i].parentID >= 0)
+		{
+			bones[i] = bones[SMDNodes[i].parentID];
+			bones[i].multMatrix(bone);
+		}
+		else
+		{
+			bones[i].loadMatrix(bone);
+		}
+	}
+
+	renderer->SetupFrame(this, 0, 0, Triangles * 3, bones);
+
 	int voffset = 0;
 	for (unsigned int i = 0; i < groups.Size(); i++)
 	{
@@ -346,42 +388,8 @@ void FSMDModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fr
 			}
 		}
 
-		int offset1 = frameno * numbones;
-		int offset2 = frameno2 * numbones;
-		float t = (float)inter;
-		float invt = 1.0f - t;
-
-		frameno = clamp(frameno, 0, (int)frameMatrices.Size() - 1);
-		frameno2 = clamp(frameno2, 0, (int)frameMatrices.Size() - 1);
-
-		TArray<VSMatrix> bones(numbones, true);
-		for (int i = 0; i < numbones; i++)
-		{
-			const float* from = frameMatrices[offset1 + i].get();
-			const float* to = frameMatrices[offset2 + i].get();
-
-			// Interpolate bone between the two frames
-			float bone[16];
-			for (int i = 0; i < 16; i++)
-			{
-				bone[i] = from[i] * invt + to[i] * t;
-			}
-
-			// Apply parent bone
-			if (SMDNodes[i].parentID >= 0)
-			{
-				bones[i] = bones[SMDNodes[i].parentID];
-				bones[i].multMatrix(bone);
-			}
-			else
-			{
-				bones[i].loadMatrix(bone);
-			}
-		}
-
 		renderer->SetMaterial(surfaceSkin, false, translation);
-		renderer->SetupFrame(this, voffset, voffset, groupTriangles, bones);
-		renderer->DrawArrays(0, groupTriangles);
+		renderer->DrawArrays(voffset, groupTriangles);
 		voffset += groupTriangles;
 	}
 }

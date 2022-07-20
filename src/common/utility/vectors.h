@@ -904,6 +904,24 @@ struct TVector4
 	{
 		return X*other.X + Y*other.Y + Z*other.Z + W*other.W;
 	}
+
+	//Converts euler angles to quaternion
+	TVector4 ToQuaternion(const TVector3<vec_t> eulers)
+	{
+		float cy = cos(eulers.Z * 0.5);
+		float sy = sin(eulers.Z * 0.5);
+		float cp = cos(eulers.Y * 0.5);
+		float sp = sin(eulers.Y * 0.5);
+		float cr = cos(eulers.X * 0.5);
+		float sr = sin(eulers.X * 0.5);
+
+		W = cr * cp * cy + sr * sp * sy;
+		X = sr * cp * cy - cr * sp * sy;
+		Y = cr * sp * cy + sr * cp * sy;
+		Z = cr * cp * sy - sr * sp * cy;
+
+		return *this;
+	}
 };
 
 template<class vec_t>
