@@ -5,6 +5,8 @@
 #include "texturemanager.h"
 #include "modelrenderer.h"
 #include "engineerrors.h"
+#include "r_utility.h"
+
 
 IQMModel::IQMModel()
 {
@@ -404,7 +406,7 @@ int IQMModel::FindFrame(const char* name)
 	return -1;
 }
 
-void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation)
+void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, DActorSkeletalData* skeleton, int translation)
 {
 	int numbones = Joints.Size();
 	int offset1 = frame1 * numbones;
@@ -425,7 +427,7 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 		float bone[16];
 		for (int i = 0; i < 16; i++)
 		{
-			bone[i] = from[i] * invt + to[i] * t;
+			bone[i] = (from[i] * invt + to[i] * t);
 		}
 
 		// Apply parent bone
@@ -437,6 +439,11 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 		else
 		{
 			bones[i].loadMatrix(bone);
+		}
+
+		if (skeleton != nullptr)
+		{
+			bones[i].translate(skeleton->move[i].X, skeleton->move[i].Y, skeleton->move[i].Z);
 		}
 	}
 
@@ -499,3 +506,9 @@ bool IQMModel::AttachAnimations(int id)
 {
 	return false;
 }
+
+bool IQMModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+{
+	return false;
+}
+

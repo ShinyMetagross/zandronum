@@ -400,7 +400,7 @@ float FVoxelModel::getAspectFactor(float stretch)
 //
 //===========================================================================
 
-void FVoxelModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, int translation)
+void FVoxelModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, DActorSkeletalData* skeleton, int translation)
 {
 	renderer->SetMaterial(skin, true, translation);
 	renderer->SetupFrame(this, 0, 0, 0, {});
@@ -414,6 +414,17 @@ void FVoxelModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int
 //===========================================================================
 
 bool FVoxelModel::AttachAnimations(int id)
+{
+	return false;
+}
+
+//===========================================================================
+//
+// And certainly not bones
+//
+//===========================================================================
+
+bool FVoxelModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
 {
 	return false;
 }

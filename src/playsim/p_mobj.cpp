@@ -158,6 +158,7 @@ CVAR (Int, cl_bloodtype, 0, CVAR_ARCHIVE);
 
 // CODE --------------------------------------------------------------------
 
+IMPLEMENT_CLASS(DActorSkeletalData, false, false);
 IMPLEMENT_CLASS(AActor, false, true)
 
 IMPLEMENT_POINTERS_START(AActor)
@@ -288,6 +289,7 @@ void AActor::Serialize(FSerializer &arc)
 		A("crushpainsound", CrushPainSound)
 		A("speed", Speed)
 		A("floatspeed", FloatSpeed)
+		("skeletonData", skeletonData)
 		A("mass", Mass)
 		A("painchance", PainChance)
 		A("spawnstate", SpawnState)
@@ -6074,6 +6076,20 @@ DEFINE_ACTION_FUNCTION(AActor, BloodSplatter)
 	return 0;
 }
 
+
+//----------------------------------------------------------------------------
+//
+// Serialize DActorSkeletalData
+//
+//----------------------------------------------------------------------------
+
+void DActorSkeletalData::Serialize(FSerializer& arc)
+{
+	Super::Serialize(arc);
+	arc("move", move)
+		("rotation", rotation)
+		("scale", scale);
+}
 
 //---------------------------------------------------------------------------
 //

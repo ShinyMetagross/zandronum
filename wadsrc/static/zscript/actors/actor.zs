@@ -1239,6 +1239,8 @@ class Actor : Thinker native
 	native bool A_AttachLight(Name lightid, int type, Color lightcolor, int radius1, int radius2, int flags = 0, Vector3 ofs = (0,0,0), double param = 0, double spoti = 10, double spoto = 25, double spotp = 0);
 	native bool A_RemoveLight(Name lightid);
 
+	action native void A_ManipulateBone(int bone, double moveX, double moveY = 0, double moveZ = 0, double rotX = 0, double rotY = 0, double rotZ = 0, double scaleX = 0, double scaleY = 0, double scaleZ = 0);
+
 	int ACS_NamedExecute(name script, int mapnum=0, int arg1=0, int arg2=0, int arg3=0)
 	{
 		return ACS_Execute(-int(script), mapnum, arg1, arg2, arg3);

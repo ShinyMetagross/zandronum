@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "textureid.h"
 #include "i_modelvertexbuffer.h"
+#include "actor.h"
 
 class FModelRenderer;
 class FGameTexture;
@@ -60,10 +61,11 @@ public:
 
 	virtual bool Load(const char * fn, int lumpnum, const char * buffer, int length) = 0;
 	virtual int FindFrame(const char * name) = 0;
-	virtual void RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, int translation=0) = 0;
+	virtual void RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, DActorSkeletalData* skeleton, int translation=0) = 0;
 	virtual void BuildVertexBuffer(FModelRenderer *renderer) = 0;
 	virtual void AddSkins(uint8_t *hitlist) = 0;
 	virtual bool AttachAnimations(int id) = 0;
+	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) = 0;
 	virtual float getAspectFactor(float vscale) { return 1.f; }
 
 	void SetVertexBuffer(int type, IModelVertexBuffer *buffer) { mVBuf[type] = buffer; }

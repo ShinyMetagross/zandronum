@@ -344,7 +344,7 @@ int FMD3Model::FindFrame(const char * name)
 //
 //===========================================================================
 
-void FMD3Model::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation)
+void FMD3Model::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, DActorSkeletalData* skeleton, int translation)
 {
 	if ((unsigned)frameno >= Frames.Size() || (unsigned)frameno2 >= Frames.Size()) return;
 
@@ -395,3 +395,7 @@ bool FMD3Model::AttachAnimations(int id)
 	return false;
 }
 
+bool FMD3Model::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+{
+	return false;
+}

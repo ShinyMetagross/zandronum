@@ -227,7 +227,7 @@ int FUE1Model::FindFrame( const char *name )
 	return -1;
 }
 
-void FUE1Model::RenderFrame( FModelRenderer *renderer, FGameTexture *skin, int frame, int frame2, double inter, int translation )
+void FUE1Model::RenderFrame( FModelRenderer *renderer, FGameTexture *skin, int frame, int frame2, double inter, DActorSkeletalData* skeleton, int translation)
 {
 	// the moment of magic
 	if ( (frame >= numFrames) || (frame2 >= numFrames) ) return;
@@ -321,6 +321,11 @@ FUE1Model::~FUE1Model()
 }
 
 bool FUE1Model::AttachAnimations(int id)
+{
+	return false;
+}
+
+bool FUE1Model::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
 {
 	return false;
 }

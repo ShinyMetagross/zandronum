@@ -26,8 +26,6 @@
 #include "texturemanager.h"
 #include "modelrenderer.h"
 #include "sc_man.h"
-#include "r_utility.h"
-
 
 bool FSMDModel::Load(const char* path, int lumpnum, const char* buffer, int length)
 {
@@ -185,6 +183,8 @@ void FSMDModel::LoadGeometry()
 		}
 	}
 
+	Printf("%d\n",SMDNodes.Size());
+
 	int amountofFrames = 0;
 	for (unsigned i = 0; i < animations.Size(); i++)
 		amountofFrames += animations[i].SMDSkeleton.Size();
@@ -268,7 +268,6 @@ void FSMDModel::LoadGeometry()
 			}
 		}
 	}
-	Printf("%d\n", matrixCounter);
 
 	mLoaded = true;
 }
@@ -325,7 +324,7 @@ int FSMDModel::FindFrame(const char* name)
 	return -1;
 }
 
-void FSMDModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frameno, int frameno2, double inter, int translation)
+void FSMDModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frameno, int frameno2, double inter, DActorSkeletalData* skeleton, int translation)
 {
 	int numbones = SMDNodes.Size();
 
@@ -400,6 +399,11 @@ bool FSMDModel::AttachAnimations(int id)
 {
 	animLookups.Push(id);
 	return true;
+}
+
+bool FSMDModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+{
+	return false;
 }
 
 

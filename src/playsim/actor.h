@@ -703,6 +703,30 @@ public:
 	}
 };
 
+class DActorSkeletalData : public DObject
+{
+	DECLARE_CLASS(DActorSkeletalData, DObject);
+public:
+	TArray<DVector3>	move;
+	TArray<DVector3>	rotation;
+	TArray<DVector3>	scale;
+
+	DActorSkeletalData() = default;
+	virtual void Serialize(FSerializer& arc) override;
+	void SetMove(DVector3& off, int bone)
+	{
+		move[bone] = off;
+	}
+	void SetRotation(DVector3& off, int bone)
+	{
+		rotation[bone] = off;
+	}
+	void SetScale(DVector3& off, int bone)
+	{
+		scale[bone] = off;
+	}
+};
+
 const double MinVel = EQUAL_EPSILON;
 
 // Map Object definition.
@@ -1068,6 +1092,9 @@ public:
 	DVector3		WorldOffset;
 	double			Speed;
 	double			FloatSpeed;
+
+	//Model Data
+	TObjPtr<DActorSkeletalData*>		skeletonData;
 
 // interaction info
 	FBlockNode		*BlockNode;			// links in blocks (if needed)

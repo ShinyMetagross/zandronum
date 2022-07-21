@@ -66,9 +66,10 @@ public:
 	FSMDModel() = default;
 	virtual bool Load(const char* fn, int lumpnum, const char* buffer, int length);
 	virtual int FindFrame(const char* name);
-	virtual void RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame, int frame2, double inter, int translation = 0);
+	virtual void RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame, int frame2, double inter, DActorSkeletalData* skeleton, int translation = 0);
 	void LoadGeometry();
 	void BuildVertexBuffer(FModelRenderer* renderer);
 	virtual void AddSkins(uint8_t* hitlist);
 	virtual bool AttachAnimations(int id);
+	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ);
 };

@@ -69,6 +69,7 @@
 #include "sbar.h"
 #include "actorinlines.h"
 #include "types.h"
+#include "model.h"
 
 static FRandom pr_camissile ("CustomActorfire");
 static FRandom pr_cabullet ("CustomBullet");
@@ -5030,4 +5031,64 @@ DEFINE_ACTION_FUNCTION(AActor, GetRenderStyle)
 		if (self->RenderStyle == LegacyRenderStyles[i]) ACTION_RETURN_INT(i);
 	}
 	ACTION_RETURN_INT(-1);	// no symbolic constant exists to handle this style.
+}
+
+
+//==========================================================================
+//
+// A_ManipulateBone(name Bone, double moveX, double moveY, double moveZ, double rotX, double rotY, double rotZ, double scaleX, double scaleY, double scaleZ);
+//
+//==========================================================================
+
+
+DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
+{
+	PARAM_ACTION_PROLOGUE(AActor);
+	PARAM_INT(bone);
+	PARAM_FLOAT(moveX);
+	PARAM_FLOAT(moveY);
+	PARAM_FLOAT(moveZ);
+	PARAM_FLOAT(rotX);
+	PARAM_FLOAT(rotY);
+	PARAM_FLOAT(rotZ);
+	PARAM_FLOAT(scaleX);
+	PARAM_FLOAT(scaleY);
+	PARAM_FLOAT(scaleZ);
+
+	if (self == nullptr)
+		ACTION_RETURN_BOOL(false);
+
+	if (bone < 0)
+	{
+		Printf("Attempt to pass invalid bone in %s.", self->GetCharacterName());
+		ACTION_RETURN_BOOL(false);
+	}
+
+	AActor* mobj = ACTION_CALL_FROM_PSPRITE() || ACTION_CALL_FROM_INVENTORY() ? self : stateowner;
+
+	if (mobj->skeletonData == nullptr)
+	{
+		auto ptr = Create<DActorSkeletalData>();
+		ptr->move = *new TArray<DVector3>();
+		ptr->rotation = *new TArray<DVector3>();
+		ptr->scale = *new TArray<DVector3>();
+		mobj->skeletonData = ptr;
+		GC::WriteBarrier(mobj, ptr);
+	}
+
+	mobj->skeletonData->move.Resize(bone + 1);
+	mobj->skeletonData->rotation.Resize(bone + 1);
+	mobj->skeletonData->scale.Resize(bone + 1);
+
+	mobj->skeletonData->move[bone].X = moveX;
+	mobj->skeletonData->move[bone].Y = moveY;
+	mobj->skeletonData->move[bone].Z = moveZ;
+	mobj->skeletonData->rotation[bone].X = rotX;
+	mobj->skeletonData->rotation[bone].Y = rotY;
+	mobj->skeletonData->rotation[bone].Z = rotZ;
+	mobj->skeletonData->scale[bone].X = scaleX;
+	mobj->skeletonData->scale[bone].Y = scaleY;
+	mobj->skeletonData->scale[bone].Z = scaleZ;
+
+	return 0;
 }

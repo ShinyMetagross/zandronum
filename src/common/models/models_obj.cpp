@@ -628,7 +628,7 @@ int FOBJModel::FindFrame(const char* name)
  * @param inter The amount to interpolate the two frames.
  * @param translation The translation for the skin
  */
-void FOBJModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation)
+void FOBJModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, DActorSkeletalData* skeleton, int translation)
 {
 	// Prevent the model from rendering if the frame number is < 0
 	if (frameno < 0 || frameno2 < 0) return;
@@ -704,6 +704,11 @@ FOBJModel::~FOBJModel()
 }
 
 bool FOBJModel::AttachAnimations(int id)
+{
+	return false;
+}
+
+bool FOBJModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
 {
 	return false;
 }

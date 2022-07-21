@@ -1,4 +1,4 @@
-#pragma once
+#pragma once(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, DActorSkeletalData* skeleton, int translation=0)
 
 #include "model.h"
 #include "i_modelvertexbuffer.h"
@@ -59,12 +59,13 @@ public:
 	bool Load(const char * fn, int lumpnum, const char * buffer, int length) override;
 	void Initialize();
 	virtual int FindFrame(const char * name) override;
-	virtual void RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, int translation=0) override;
+	virtual void RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, DActorSkeletalData* skeleton, int translation=0) override;
 	virtual void AddSkins(uint8_t *hitlist) override;
 	FTextureID GetPaletteTexture() const { return mPalette; }
 	void BuildVertexBuffer(FModelRenderer *renderer) override;
 	float getAspectFactor(float vscale) override;
 	virtual bool AttachAnimations(int id) override;
+	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) override;
 };
 
 

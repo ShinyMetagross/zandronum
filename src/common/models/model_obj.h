@@ -98,10 +98,11 @@ public:
 	~FOBJModel();
 	bool Load(const char* fn, int lumpnum, const char* buffer, int length) override;
 	int FindFrame(const char* name) override;
-	void RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame, int frame2, double inter, int translation=0) override;
+	void RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame, int frame2, double inter, DActorSkeletalData* skeleton, int translation=0) override;
 	void BuildVertexBuffer(FModelRenderer* renderer) override;
 	void AddSkins(uint8_t* hitlist) override;
 	virtual bool AttachAnimations(int id) override;
+	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) override;
 };
 
 #endif

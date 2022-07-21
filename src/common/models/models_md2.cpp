@@ -363,7 +363,7 @@ int FDMDModel::FindFrame(const char * name)
 //
 //===========================================================================
 
-void FDMDModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation)
+void FDMDModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, DActorSkeletalData* skeleton, int translation)
 {
 	if (frameno >= info.numFrames || frameno2 >= info.numFrames) return;
 
@@ -386,7 +386,10 @@ bool FDMDModel::AttachAnimations(int id)
 	return false;
 }
 
-
+bool FDMDModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+{
+	return false;
+}
 
 //===========================================================================
 //
@@ -559,6 +562,11 @@ FMD2Model::~FMD2Model()
 }
 
 bool FMD2Model::AttachAnimations(int id)
+{
+	return false;
+}
+
+bool FMD2Model::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
 {
 	return false;
 }
