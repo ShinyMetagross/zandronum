@@ -47,6 +47,7 @@ class GLVertexBuffer : public IVertexBuffer, public GLBuffer
 		int bindingpoint;
 		int format;
 		bool normalize;
+		bool integerType;
 		int size;
 		int offset;
 	};

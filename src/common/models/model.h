@@ -26,6 +26,7 @@ struct FSpriteModelFrame
 	TArray<FTextureID> skinIDs;
 	TArray<FTextureID> surfaceskinIDs;
 	TArray<int> modelframes;
+	uint16_t animationID;
 	float xscale, yscale, zscale;
 	// [BB] Added zoffset, rotation parameters and flags.
 	// Added xoffset, yoffset

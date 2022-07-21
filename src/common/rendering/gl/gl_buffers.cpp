@@ -214,6 +214,7 @@ void GLVertexBuffer::SetFormat(int numBindingPoints, int numAttributes, size_t s
 	static int VFmtToGLFmt[] = { GL_FLOAT, GL_FLOAT, GL_FLOAT, GL_FLOAT, GL_UNSIGNED_BYTE, GL_INT_2_10_10_10_REV, GL_UNSIGNED_BYTE };
 	static uint8_t VFmtToSize[] = { 4, 3, 2, 1, 4, 4, 4 };
 	static bool VFmtToNormalize[] = { false, false, false, false, true, true, false };
+	static bool VFmtToIntegerType[] = { false, false, false, false, false, false, true };
 
 	mStride = stride;
 	mNumBindingPoints = numBindingPoints;
@@ -228,6 +229,7 @@ void GLVertexBuffer::SetFormat(int numBindingPoints, int numAttributes, size_t s
 			attrinf.offset = attrs[i].offset;
 			attrinf.bindingpoint = attrs[i].binding;
 			attrinf.normalize = VFmtToNormalize[attrs[i].format];
+			attrinf.integerType = VFmtToIntegerType[attrs[i].format];
 		}
 	}
 }
@@ -248,7 +250,10 @@ void GLVertexBuffer::Bind(int *offsets)
 		{
 			glEnableVertexAttribArray(i);
 			size_t ofs = offsets == nullptr ? attrinf.offset : attrinf.offset + mStride * offsets[attrinf.bindingpoint];
-			glVertexAttribPointer(i, attrinf.size, attrinf.format, attrinf.normalize, (GLsizei)mStride, (void*)(intptr_t)ofs);
+			if (!attrinf.integerType)
+				glVertexAttribPointer(i, attrinf.size, attrinf.format, attrinf.normalize, (GLsizei)mStride, (void*)(intptr_t)ofs);
+			else
+				glVertexAttribIPointer(i, attrinf.size, attrinf.format, (GLsizei)mStride, (void*)(intptr_t)ofs);
 		}
 		i++;
 	}

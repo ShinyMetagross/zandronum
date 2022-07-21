@@ -388,6 +388,7 @@ static void ParseModelDefLump(int Lump)
 		if (sc.Compare("model"))
 		{
 			int index, surface;
+			int animationCounter = 0;
 			FString path = "";
 			sc.MustGetString();
 
@@ -468,6 +469,7 @@ static void ParseModelDefLump(int Lump)
 				}
 				else if (sc.Compare("animation"))
 				{
+					animationCounter++;
 					sc.MustGetString();
 					FixPathSeperator(sc.String);
 
@@ -475,6 +477,8 @@ static void ParseModelDefLump(int Lump)
 					{
 						sc.ScriptError("No models found to attach animation %s to %s", sc.String, type->TypeName.GetChars());
 					}
+
+					smf.animationID = animationCounter;
 
 					if(!FindAnimation(path.GetChars(), sc.String, smf.modelIDs))
 					{

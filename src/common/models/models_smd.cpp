@@ -55,7 +55,7 @@ void FSMDModel::LoadGeometry()
 				while (!sc.Compare("end"))
 				{
 					sc.MustGetNumber();
-					SMDNodes.Push(*new SMDNode());
+					SMDNodes.Push(SMDNode());
 					nodeCounter++;
 					SMDNodes[nodeCounter].ID = sc.Number;
 					sc.MustGetString();
@@ -72,17 +72,17 @@ void FSMDModel::LoadGeometry()
 			if (sc.Compare("skeleton"))
 			{
 				sc.MustGetString();
-				animations.Push(*new SMDAnimation());
+				animations.Push(SMDAnimation());
 				while (sc.Compare("time"))
 				{
 					sc.MustGetNumber();
-					animations[animations.Size() - 1].SMDSkeleton.Push(*new SMDSkeletonFrame());
+					animations[animations.Size() - 1].SMDSkeleton.Push(SMDSkeletonFrame());
 
 					framesCounter = animations[animations.Size() - 1].SMDSkeleton.Size() - 1;
 					animations[animations.Size() - 1].SMDSkeleton[framesCounter].time = sc.Number;
 					while (!sc.Compare("end") && !sc.Compare("time"))
 					{
-						animations[animations.Size() - 1].SMDSkeleton[framesCounter].skeletonNodes.Push(*new SMDSkeletonNode());
+						animations[animations.Size() - 1].SMDSkeleton[framesCounter].skeletonNodes.Push(SMDSkeletonNode());
 						boneCounter = animations[animations.Size() - 1].SMDSkeleton[framesCounter].skeletonNodes.Size() - 1;
 						sc.MustGetNumber(); animations[animations.Size() - 1].SMDSkeleton[framesCounter].skeletonNodes[boneCounter].boneID = sc.Number;
 						sc.MustGetFloat();	animations[animations.Size() - 1].SMDSkeleton[framesCounter].skeletonNodes[boneCounter].posX = (float)sc.Float;
@@ -102,7 +102,7 @@ void FSMDModel::LoadGeometry()
 				sc.GetString();
 				while (!sc.Compare("end"))
 				{
-					SMDTriangles.Push(*new SMDTriangle());
+					SMDTriangles.Push(SMDTriangle());
 
 					for (unsigned i = 0; i < surfaceSkins.Size(); i++)
 					{
@@ -115,7 +115,7 @@ void FSMDModel::LoadGeometry()
 					if (addGroup)
 					{
 						surfaceSkins.Push(sc.String);
-						groups.Push(*new SMDGroup());
+						groups.Push(SMDGroup());
 						groupsCounter++;
 						groups[groupsCounter].surface = LoadSkin(mPath, sc.String);
 					}
@@ -124,7 +124,6 @@ void FSMDModel::LoadGeometry()
 
 					SMDTriangles[Triangles].surface = sc.String;
 
-					int oldLine = sc.Line;
 					for (int i = 0; i < 3; i++)
 					{
 						sc.MustGetNumber();
@@ -146,26 +145,29 @@ void FSMDModel::LoadGeometry()
 						sc.MustGetFloat();
 						SMDTriangles[Triangles].uvY[i] = (float)sc.Float;
 
-						oldLine = sc.Line;
+						int oldLine = sc.Line;
 						sc.GetString();
 						if (sc.Line == oldLine)
 						{
 							sc.UnGet();
 							sc.MustGetNumber();
-							for (int j = 1; j < sc.Number + 1; j++)
+							int links = sc.Number;
+							for (unsigned j = 0; j < links; j++)
 							{
 								sc.GetString();
 								if (sc.Line == oldLine)
 								{
 									sc.UnGet();
 									sc.MustGetNumber();
-									SMDTriangles[Triangles].boneID[j - 1][i] = sc.Number;
+									if(j < 4)
+										SMDTriangles[Triangles].boneID[j][i] = sc.Number;
 									sc.GetString();
 									if (sc.Line == oldLine)
 									{
 										sc.UnGet();
 										sc.MustGetFloat();
-										SMDTriangles[Triangles].weight[j][i] = sc.Float;
+										if (j < 4)
+											SMDTriangles[Triangles].weight[j+1][i] = sc.Float;
 									}
 									else { sc.UnGet(); break; }
 								}
@@ -182,8 +184,6 @@ void FSMDModel::LoadGeometry()
 			}
 		}
 	}
-
-	Printf("%d\n",SMDNodes.Size());
 
 	int amountofFrames = 0;
 	for (unsigned i = 0; i < animations.Size(); i++)
@@ -213,8 +213,9 @@ void FSMDModel::LoadGeometry()
 		{
 			baseframe[i] = baseframe[SMDNodes[i].parentID];
 			baseframe[i].multMatrix(m);
-			inversebaseframe[i] = inversebaseframe[SMDNodes[i].parentID];
-			inversebaseframe[i].multMatrix(invm);
+
+			inversebaseframe[i] = invm;
+			inversebaseframe[i].multMatrix(inversebaseframe[SMDNodes[i].parentID]);
 		}
 		else
 		{
@@ -223,7 +224,7 @@ void FSMDModel::LoadGeometry()
 		}
 	}
 
-	int matrixCounter = 0;
+	int frameCounter = 0;
 	
 	frameMatrices.Resize(amountofFrames*SMDNodes.Size());
 	for (unsigned i = 0; i < animations.Size(); i++)
@@ -232,7 +233,6 @@ void FSMDModel::LoadGeometry()
 		{
 			for (unsigned k = 0; k < animations[i].SMDSkeleton[j].skeletonNodes.Size(); k++)
 			{
-				matrixCounter++;
 				FVector3 translate;
 				translate.X = animations[0].SMDSkeleton[0].skeletonNodes[k].posX; translate.X += animations[i].SMDSkeleton[j].skeletonNodes[k].posX;
 				translate.Y = animations[0].SMDSkeleton[0].skeletonNodes[k].posY; translate.Y += animations[i].SMDSkeleton[j].skeletonNodes[k].posY;
@@ -252,7 +252,7 @@ void FSMDModel::LoadGeometry()
 				m.translate(translate.X, translate.Y, translate.Z);
 				m.multQuaternion(quaternion);
 
-				VSMatrix& result = frameMatrices[matrixCounter];
+				VSMatrix& result = frameMatrices[frameCounter + k];
 
 				if (SMDNodes[k].parentID >= 0)
 				{
@@ -266,6 +266,7 @@ void FSMDModel::LoadGeometry()
 					result.multMatrix(inversebaseframe[k]);
 				}
 			}
+			frameCounter++;
 		}
 	}
 
@@ -293,10 +294,10 @@ void FSMDModel::BuildVertexBuffer(FModelRenderer* renderer)
 				vert->Set(tri.posX[j], tri.posZ[j], tri.posY[j], tri.uvX[j], tri.uvY[j]);
 				vert->SetNormal(tri.normX[j], tri.normZ[j], tri.normY[j]);
 				vert->SetBoneSelector(tri.parentBone[j], tri.boneID[0][j], tri.boneID[1][j], tri.boneID[2][j]);
-				vert->SetBoneWeight((int)clamp((1.0 - tri.weight[0][j] - tri.weight[1][j] - tri.weight[2][j]) * 255.0, 0.0, 255.0),
-					(int)clamp(tri.weight[0][j] * 255.0, 0.0, 255.0),
+				vert->SetBoneWeight((int)clamp((1.0 - tri.weight[1][j] - tri.weight[2][j] - tri.weight[3][j]) * 255.0, 0.0, 255.0),
 					(int)clamp(tri.weight[1][j] * 255.0, 0.0, 255.0),
-					(int)clamp(tri.weight[2][j] * 255.0, 0.0, 255.0));
+					(int)clamp(tri.weight[2][j] * 255.0, 0.0, 255.0),
+					(int)clamp(tri.weight[3][j] * 255.0, 0.0, 255.0));
 			}
 		}
 		vbuf->UnlockVertexBuffer();
@@ -326,15 +327,23 @@ int FSMDModel::FindFrame(const char* name)
 
 void FSMDModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frameno, int frameno2, double inter, DActorSkeletalData* skeleton, int translation)
 {
+	frameno = clamp(frameno, 0, (int)frameMatrices.Size() - 1);
+	frameno2 = clamp(frameno2, 0, (int)frameMatrices.Size() - 1);
+
+	int animationNum = curSpriteMDLFrame->animationID;
 	int numbones = SMDNodes.Size();
 
 	int offset1 = frameno * numbones;
 	int offset2 = frameno2 * numbones;
+
+	for (unsigned i = 0; i < animationNum; i++)
+	{
+		offset1 += animations[i].SMDSkeleton.Size() * numbones;
+		offset2 += animations[i].SMDSkeleton.Size() * numbones;
+	}
+
 	float t = (float)inter;
 	float invt = 1.0f - t;
-
-	frameno = clamp(frameno, 0, (int)frameMatrices.Size() - 1);
-	frameno2 = clamp(frameno2, 0, (int)frameMatrices.Size() - 1);
 
 	TArray<VSMatrix> bones(numbones, true);
 	for (int i = 0; i < numbones; i++)

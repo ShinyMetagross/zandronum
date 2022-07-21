@@ -114,7 +114,6 @@ void VSMatrix::multQuaternion(const TVector4<FLOATTYPE>& q)
 	multMatrix(m);
 }
 
-
 // gl LoadMatrix implementation
 void 
 VSMatrix::loadMatrix(const FLOATTYPE *aMatrix)

@@ -159,8 +159,8 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 			{
 				baseframe[i] = baseframe[j.Parent];
 				baseframe[i].multMatrix(m);
-				inversebaseframe[i] = inversebaseframe[j.Parent];
-				inversebaseframe[i].multMatrix(invm);
+				inversebaseframe[i] = invm;
+				inversebaseframe[i].multMatrix(inversebaseframe[j.Parent]);
 			}
 			else
 			{
@@ -408,14 +408,14 @@ int IQMModel::FindFrame(const char* name)
 
 void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, DActorSkeletalData* skeleton, int translation)
 {
+	frame1 = clamp(frame1, 0, (int)FrameTransforms.Size() - 1);
+	frame2 = clamp(frame2, 0, (int)FrameTransforms.Size() - 1);
+
 	int numbones = Joints.Size();
 	int offset1 = frame1 * numbones;
 	int offset2 = frame2 * numbones;
 	float t = (float)inter;
 	float invt = 1.0f - t;
-
-	frame1 = clamp(frame1, 0, (int)FrameTransforms.Size() - 1);
-	frame2 = clamp(frame2, 0, (int)FrameTransforms.Size() - 1);
 
 	TArray<VSMatrix> bones(numbones, true);
 	for (int i = 0; i < numbones; i++)
@@ -427,7 +427,7 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 		float bone[16];
 		for (int i = 0; i < 16; i++)
 		{
-			bone[i] = (from[i] * invt + to[i] * t);
+			bone[i] = from[i] * invt + to[i] * t;
 		}
 
 		// Apply parent bone
@@ -443,7 +443,35 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 
 		if (skeleton != nullptr)
 		{
-			bones[i].translate(skeleton->move[i].X, skeleton->move[i].Y, skeleton->move[i].Z);
+			VSMatrix position, inversePosition;
+			position.loadIdentity();
+
+			if (skeleton->move.Size() > i)
+			{
+				if (!skeleton->move[i].isZero())
+				{
+					position.translate(skeleton->move[i].X, skeleton->move[i].Y, skeleton->move[i].Z);
+					bones[i].multMatrix(position);
+				}
+				if (!skeleton->rotation[i].isZero())
+				{
+					FVector3 eulerRotation;
+					eulerRotation.X = (skeleton->rotation[i].X * 3.141593) / 180.0;
+					eulerRotation.Y = (skeleton->rotation[i].Y * 3.141593) / 180.0;
+					eulerRotation.Z = (skeleton->rotation[i].Z * 3.141593) / 180.0;
+
+					FVector4 quaternion;
+					quaternion.ToQuaternion(eulerRotation);
+					bones[i].multQuaternion(quaternion);
+
+					Printf("%f\n",bones[i].get()[8]);
+				}
+				if (!skeleton->scale[i].isZero())
+				{
+					position.scale(skeleton->scale[i].X, skeleton->scale[i].Y, skeleton->scale[i].Z);
+					bones[i].multMatrix(position);
+				}
+			}
 		}
 	}
 

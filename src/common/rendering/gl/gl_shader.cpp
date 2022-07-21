@@ -629,6 +629,9 @@ bool FShader::Load(const char * name, const char * vert_prog_lump, const char * 
 	{
 		int tempindex = glGetUniformBlockIndex(hShader, "LightBufferUBO");
 		if (tempindex != -1) glUniformBlockBinding(hShader, tempindex, LIGHTBUF_BINDINGPOINT);
+
+		tempindex = glGetUniformBlockIndex(hShader, "BoneBufferUBO");
+		if (tempindex != -1) glUniformBlockBinding(hShader, tempindex, BONEBUF_BINDINGPOINT);
 	}
 	int tempindex = glGetUniformBlockIndex(hShader, "ViewpointUBO");
 	if (tempindex != -1) glUniformBlockBinding(hShader, tempindex, VIEWPOINT_BINDINGPOINT);

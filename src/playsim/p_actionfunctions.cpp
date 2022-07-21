@@ -5076,9 +5076,21 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 		GC::WriteBarrier(mobj, ptr);
 	}
 
-	mobj->skeletonData->move.Resize(bone + 1);
-	mobj->skeletonData->rotation.Resize(bone + 1);
-	mobj->skeletonData->scale.Resize(bone + 1);
+	while (bone >= mobj->skeletonData->move.Size())
+	{
+		mobj->skeletonData->move.Push(DVector3());
+		mobj->skeletonData->move.Last().Zero();
+	}
+	while (bone >= mobj->skeletonData->rotation.Size())
+	{
+		mobj->skeletonData->rotation.Push(DVector3());
+		mobj->skeletonData->rotation.Last().Zero();
+	}
+	while (bone >= mobj->skeletonData->scale.Size())
+	{
+		mobj->skeletonData->scale.Push(DVector3());
+		mobj->skeletonData->scale.Last().Zero();
+	}
 
 	mobj->skeletonData->move[bone].X = moveX;
 	mobj->skeletonData->move[bone].Y = moveY;
