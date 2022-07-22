@@ -136,6 +136,8 @@ private:
 	TArray<IQMBounds> Bounds;
 	TArray<IQMVertexArray> VertexArrays;
 	uint32_t NumVertices = 0;
+	TArray<VSMatrix> baseframe;
+	TArray<VSMatrix> inversebaseframe;
 
 	TArray<FModelVertex> Vertices;
 };

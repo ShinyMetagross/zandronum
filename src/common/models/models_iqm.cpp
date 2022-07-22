@@ -143,8 +143,8 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 			anim.Loop = !!(reader.ReadUInt32() & 1);
 		}
 
-		TArray<VSMatrix> baseframe(num_joints, true);
-		TArray<VSMatrix> inversebaseframe(num_joints, true);
+		baseframe.Resize(num_joints);
+		inversebaseframe.Resize(num_joints);
 		for (uint32_t i = 0; i < num_joints; i++)
 		{
 			const IQMJoint& j = Joints[i];
@@ -443,64 +443,43 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 
 		if (skeleton != nullptr)
 		{
-			VSMatrix position, inversePosition;
-			position = bones[i];
-			float prePos[16];
-			for (int i = 0; i < 16; i++)
-			{
-				prePos[i] = position.get()[i];
-			}
-
-			//Notes
-			// 0 = scale x
-			// 1 = rotation x?
-			// 5 = scale y
-			// 10 = scale z
-			// 13 = pos Z
+			VSMatrix position;
+			position.loadIdentity();
+			bool editedBone = false;
 			if (skeleton->move.Size() > i)
 			{
 				if (!skeleton->move[i].isZero())
 				{
-					prePos[12] = prePos[0] * skeleton->move[i].X;
-					prePos[13] = prePos[1] * skeleton->move[i].X;
-					prePos[14] = prePos[2] * skeleton->move[i].X;
-					//position.translate(skeleton->move[i].X, skeleton->move[i].Y, skeleton->move[i].Z);
-					//bones[i].multMatrix(position);
+					position.translate(skeleton->move[i].X, skeleton->move[i].Y, skeleton->move[i].Z);
+					editedBone = true;
 				}
 				if (!skeleton->rotation[i].isZero())
 				{
-					/*FVector3 eulerRotation;
-					eulerRotation.X = (skeleton->rotation[i].X * 3.141593) / 180.0;
-					eulerRotation.Y = (skeleton->rotation[i].Y * 3.141593) / 180.0;
-					eulerRotation.Z = (skeleton->rotation[i].Z * 3.141593) / 180.0;
-
-					FVector4 quaternion;
-					quaternion.ToQuaternion(eulerRotation);
-					bones[i].multQuaternion(quaternion);*/
-					//Printf("%f\n",bones[i].get()[8]);
-
-					FVector3 eulerRotation;
-					eulerRotation.X = (skeleton->rotation[i].X * 3.141593) / 180.0;
-					eulerRotation.Y = (skeleton->rotation[i].Y * 3.141593) / 180.0;
-					eulerRotation.Z = (skeleton->rotation[i].Z * 3.141593) / 180.0;
-					FVector4 quaternion;
-					quaternion.ToQuaternion(eulerRotation);
-					//bones[i].multQuaternion(quaternion);
-					/*prePos[9] = quaternion.W;
-					prePos[6] = quaternion.X;
-					prePos[7] = quaternion.Y;
-					prePos[8] = quaternion.Z;*/
+					position.rotate(skeleton->rotation[i].X, 1.0, 0.0, 0.0);
+					position.rotate(skeleton->rotation[i].Y, 0.0, 1.0, 0.0);
+					position.rotate(skeleton->rotation[i].Z, 0.0, 0.0, 1.0);
+					editedBone = true;
 				}
 				if (!skeleton->scale[i].isZero())
 				{
-					//prePos[0] = skeleton->scale[i].X;
-					//prePos[5] = skeleton->scale[i].Y;
-					//prePos[10] = skeleton->scale[i].Z;
-					//position.scale(skeleton->scale[i].X, skeleton->scale[i].Y, skeleton->scale[i].Z);
-					//bones[i].multMatrix(position);
+					position.scale(skeleton->scale[i].X, skeleton->scale[i].Y, skeleton->scale[i].Z);
+					editedBone = true;
 				}
-				Printf("Index 0: %f\nIndex 1: %f\nIndex 2: %f\nIndex 3: %f\nIndex 4: %f\nIndex 5: %f\nIndex 6: %f\nIndex 7: %f\nIndex 8: %f\nIndex 9: %f\nIndex 10: %f\nIndex 11: %f\nIndex 12: %f\nIndex 13: %f\nIndex 14: %f\nIndex 15: %f\n", bones[i].get()[0], bones[i].get()[1], bones[i].get()[2], bones[i].get()[3], bones[i].get()[4], bones[i].get()[5], bones[i].get()[6], bones[i].get()[7], bones[i].get()[8], bones[i].get()[9], bones[i].get()[10], bones[i].get()[11], bones[i].get()[12], bones[i].get()[13], bones[i].get()[14], bones[i].get()[15]);
-				bones[i].loadMatrix(prePos);
+
+				if (editedBone)
+				{
+					if (Joints[i].Parent >= 0)
+					{
+						bones[i] = baseframe[Joints[i].Parent];
+						bones[i].multMatrix(position);
+						bones[i].multMatrix(inversebaseframe[i]);
+					}
+					else
+					{
+						bones[i] = position;
+						bones[i].multMatrix(inversebaseframe[i]);
+					}
+				}
 			}
 		}
 	}
