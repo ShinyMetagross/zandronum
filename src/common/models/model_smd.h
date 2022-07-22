@@ -33,7 +33,7 @@ class FSMDModel : public FModel
 	{
 		FString surface;
 		unsigned int parentBone[3], boneID[3][3];
-		float posX[3], posY[3], posZ[3], normX[3], normY[3], normZ[3], uvX[3], uvY[3], weight[4][3];
+		float posX[3], posY[3], posZ[3], normX[3], normY[3], normZ[3], uvX[3], uvY[3], weight[3][3];
 	};
 
 	//SMD doesn't have groups. But we need to create artifical ones.
@@ -55,6 +55,8 @@ class FSMDModel : public FModel
 	TArray<FString>			surfaceSkins;
 	TArray<SMDAnimation>	animations;
 	TArray<VSMatrix>		frameMatrices;
+	TArray<VSMatrix>		baseframe;
+	TArray<VSMatrix>		inversebaseframe;
 	TArray<int>				animLookups;
 	int mLumpNum;
 	int Triangles = 0;

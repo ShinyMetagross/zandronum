@@ -167,7 +167,7 @@ void FSMDModel::LoadGeometry()
 										sc.UnGet();
 										sc.MustGetFloat();
 										if (j < 4)
-											SMDTriangles[Triangles].weight[j+1][i] = sc.Float;
+											SMDTriangles[Triangles].weight[j][i] = sc.Float;
 									}
 									else { sc.UnGet(); break; }
 								}
@@ -189,8 +189,8 @@ void FSMDModel::LoadGeometry()
 	for (unsigned i = 0; i < animations.Size(); i++)
 		amountofFrames += animations[i].SMDSkeleton.Size();
 
-	TArray<VSMatrix> baseframe(SMDNodes.Size(), true);
-	TArray<VSMatrix> inversebaseframe(SMDNodes.Size(), true);
+	baseframe.Resize(SMDNodes.Size());
+	inversebaseframe.Resize(SMDNodes.Size());
 	for (uint32_t i = 0; i < SMDNodes.Size(); i++)
 	{
 		const SMDSkeletonNode& n = animations[0].SMDSkeleton[0].skeletonNodes[i];
@@ -198,22 +198,15 @@ void FSMDModel::LoadGeometry()
 		VSMatrix m, invm;
 		m.loadIdentity();
 		m.translate(n.posX, n.posY, n.posZ);
-
-		FVector3 eulerRotation;
-		eulerRotation.X = n.rotX;
-		eulerRotation.Y = n.rotY;
-		eulerRotation.Z = n.rotZ;
-
-		FVector4 quaternion;
-		quaternion.ToQuaternion(eulerRotation);
-		m.multQuaternion(quaternion);
-
+		m.rotate(n.rotX * 180 / 3.141593, 1.0, 0.0, 0.0);
+		m.rotate(n.rotY * 180 / 3.141593, 0.0, 1.0, 0.0);
+		m.rotate(n.rotZ * 180 / 3.141593, 0.0, 0.0, 1.0);
 		m.inverseMatrix(invm);
+
 		if (SMDNodes[i].parentID >= 0)
 		{
 			baseframe[i] = baseframe[SMDNodes[i].parentID];
 			baseframe[i].multMatrix(m);
-
 			inversebaseframe[i] = invm;
 			inversebaseframe[i].multMatrix(inversebaseframe[SMDNodes[i].parentID]);
 		}
@@ -225,7 +218,6 @@ void FSMDModel::LoadGeometry()
 	}
 
 	int frameCounter = 0;
-	
 	frameMatrices.Resize(amountofFrames*SMDNodes.Size());
 	for (unsigned i = 0; i < animations.Size(); i++)
 	{
@@ -234,26 +226,18 @@ void FSMDModel::LoadGeometry()
 			for (unsigned k = 0; k < animations[i].SMDSkeleton[j].skeletonNodes.Size(); k++)
 			{
 				FVector3 translate;
-				translate.X = animations[0].SMDSkeleton[0].skeletonNodes[k].posX; translate.X += animations[i].SMDSkeleton[j].skeletonNodes[k].posX;
-				translate.Y = animations[0].SMDSkeleton[0].skeletonNodes[k].posY; translate.Y += animations[i].SMDSkeleton[j].skeletonNodes[k].posY;
-				translate.Z = animations[0].SMDSkeleton[0].skeletonNodes[k].posZ; translate.Z += animations[i].SMDSkeleton[j].skeletonNodes[k].posZ;
-
-				FVector3 eulerRotation;
-				eulerRotation.X = animations[0].SMDSkeleton[0].skeletonNodes[k].rotX; eulerRotation.X += animations[i].SMDSkeleton[j].skeletonNodes[k].rotX;
-				eulerRotation.Y = animations[0].SMDSkeleton[0].skeletonNodes[k].rotY; eulerRotation.Y += animations[i].SMDSkeleton[j].skeletonNodes[k].rotY;
-				eulerRotation.Z = animations[0].SMDSkeleton[0].skeletonNodes[k].rotZ; eulerRotation.Z += animations[i].SMDSkeleton[j].skeletonNodes[k].rotZ;
-
-				FVector4 quaternion;
-				quaternion.ToQuaternion(eulerRotation);
-				quaternion.MakeUnit();
+				translate.X = animations[i].SMDSkeleton[j].skeletonNodes[k].posX;
+				translate.Y = animations[i].SMDSkeleton[j].skeletonNodes[k].posY;
+				translate.Z = animations[i].SMDSkeleton[j].skeletonNodes[k].posZ;
 
 				VSMatrix m;
 				m.loadIdentity();
 				m.translate(translate.X, translate.Y, translate.Z);
-				m.multQuaternion(quaternion);
+				m.rotate(animations[i].SMDSkeleton[j].skeletonNodes[k].rotX * 180 / 3.141593, 1.0, 0.0, 0.0);
+				m.rotate(animations[i].SMDSkeleton[j].skeletonNodes[k].rotY * 180 / 3.141593, 0.0, 1.0, 0.0);
+				m.rotate(animations[i].SMDSkeleton[j].skeletonNodes[k].rotZ * 180 / 3.141593, 0.0, 0.0, 1.0);
 
 				VSMatrix& result = frameMatrices[frameCounter + k];
-
 				if (SMDNodes[k].parentID >= 0)
 				{
 					result = baseframe[SMDNodes[k].parentID];
@@ -291,13 +275,13 @@ void FSMDModel::BuildVertexBuffer(FModelRenderer* renderer)
 			for (int j = 0; j < 3; j++)
 			{
 				FModelVertex* vert = &vptr[vidx++];
-				vert->Set(tri.posX[j], tri.posZ[j], tri.posY[j], tri.uvX[j], tri.uvY[j]);
-				vert->SetNormal(tri.normX[j], tri.normZ[j], tri.normY[j]);
+				vert->Set(tri.posX[j], tri.posY[j], tri.posZ[j], tri.uvX[j], tri.uvY[j]);
+				vert->SetNormal(tri.normX[j], tri.normY[j], tri.normZ[j]);
 				vert->SetBoneSelector(tri.parentBone[j], tri.boneID[0][j], tri.boneID[1][j], tri.boneID[2][j]);
-				vert->SetBoneWeight((int)clamp((1.0 - tri.weight[1][j] - tri.weight[2][j] - tri.weight[3][j]) * 255.0, 0.0, 255.0),
-					(int)clamp(tri.weight[1][j] * 255.0, 0.0, 255.0),
-					(int)clamp(tri.weight[2][j] * 255.0, 0.0, 255.0),
-					(int)clamp(tri.weight[3][j] * 255.0, 0.0, 255.0));
+				vert->SetBoneWeight((int)clamp((1.0f - tri.weight[0][j] - tri.weight[1][j] - tri.weight[2][j]) * 255.0f, 0.0f, 255.0f), 
+					(int)clamp(tri.weight[0][j] * 255.0f, 0.0f, 255.0f), 
+					(int)clamp(tri.weight[1][j] * 255.0f, 0.0f, 255.0f), 
+					(int)clamp(tri.weight[2][j] * 255.0f, 0.0f, 255.0f));
 			}
 		}
 		vbuf->UnlockVertexBuffer();
