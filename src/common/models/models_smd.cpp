@@ -237,7 +237,7 @@ void FSMDModel::LoadGeometry()
 				m.rotate(animations[i].SMDSkeleton[j].skeletonNodes[k].rotY * 180 / 3.141593, 0.0, 1.0, 0.0);
 				m.rotate(animations[i].SMDSkeleton[j].skeletonNodes[k].rotZ * 180 / 3.141593, 0.0, 0.0, 1.0);
 
-				VSMatrix& result = frameMatrices[frameCounter + k];
+				VSMatrix& result = frameMatrices[frameCounter * animations[i].SMDSkeleton[j].skeletonNodes.Size() + k];
 				if (SMDNodes[k].parentID >= 0)
 				{
 					result = baseframe[SMDNodes[k].parentID];
@@ -249,6 +249,7 @@ void FSMDModel::LoadGeometry()
 					result = m;
 					result.multMatrix(inversebaseframe[k]);
 				}
+				//Printf("Position X: %f, Position Y: %f, Position Z: %f, Rotation X: %f, Rotation Y: %f, Rotation Z: %f\n", translate.X, translate.Y, translate.Z, animations[i].SMDSkeleton[j].skeletonNodes[k].rotX, animations[i].SMDSkeleton[j].skeletonNodes[k].rotY, animations[i].SMDSkeleton[j].skeletonNodes[k].rotZ);
 			}
 			frameCounter++;
 		}
@@ -278,10 +279,13 @@ void FSMDModel::BuildVertexBuffer(FModelRenderer* renderer)
 				vert->Set(tri.posX[j], tri.posY[j], tri.posZ[j], tri.uvX[j], tri.uvY[j]);
 				vert->SetNormal(tri.normX[j], tri.normY[j], tri.normZ[j]);
 				vert->SetBoneSelector(tri.parentBone[j], tri.boneID[0][j], tri.boneID[1][j], tri.boneID[2][j]);
-				vert->SetBoneWeight((int)clamp((1.0f - tri.weight[0][j] - tri.weight[1][j] - tri.weight[2][j]) * 255.0f, 0.0f, 255.0f), 
-					(int)clamp(tri.weight[0][j] * 255.0f, 0.0f, 255.0f), 
-					(int)clamp(tri.weight[1][j] * 255.0f, 0.0f, 255.0f), 
-					(int)clamp(tri.weight[2][j] * 255.0f, 0.0f, 255.0f));
+
+				FVector3 weights;
+				weights.X = clamp(tri.weight[0][j] * 255.0f, 0.0f, 255.0f);
+				weights.Y = clamp(tri.weight[0][j] * 255.0f, 0.0f, 255.0f);
+				weights.Z = clamp(tri.weight[0][j] * 255.0f, 0.0f, 255.0f);
+
+				vert->SetBoneWeight((int)clamp((255.0f - weights.X - weights.Y - weights.Z) , 0.0f, 255.0f), (int)weights.X, (int)weights.Y, (int)weights.Z);
 			}
 		}
 		vbuf->UnlockVertexBuffer();
