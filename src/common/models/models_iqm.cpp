@@ -422,9 +422,11 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 	float invt = 1.0f - t;
 
 	TArray<VSMatrix> bones(numbones, true);
-	TArray<VSMatrix> bonePositions = FrameTransforms;
 	for (int i = 0; i < numbones; i++)
 	{
+		VSMatrix framePosition1 = FrameTransforms[offset1 + i];
+		VSMatrix framePosition2 = FrameTransforms[offset2 + i];
+
 		VSMatrix pos1;
 		VSMatrix pos2;
 		pos1.loadIdentity();
@@ -457,13 +459,13 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 					pos2 = pos2mod;
 					pos2.multMatrix(inversebaseframe[i]);
 				}
-				bonePositions[offset1 + i] = pos1;
-				bonePositions[offset2 + i] = pos2;
+				framePosition1 = pos1;
+				framePosition2 = pos2;
 			}
 		}
 
-		const float* from = bonePositions[offset1 + i].get();
-		const float* to = bonePositions[offset2 + i].get();
+		const float* from = framePosition1.get();
+		const float* to = framePosition2.get();
 
 		// Interpolate bone between the two frames
 		float bone[16];

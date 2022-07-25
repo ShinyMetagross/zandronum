@@ -289,6 +289,8 @@ void RenderFrameModels(FModelRenderer *renderer, FLevelLocals *Level, const FSpr
 
 			if (smfNext && smf->modelframes[i] != smfNext->modelframes[i])
 				mdl->RenderFrame(renderer, tex, smf->modelframes[i], smfNext->modelframes[i], inter, actor->skeletonData.Get(), translation);
+			else if ((smf->flags & MDL_INTERPOLATESAMEFRAME))
+				mdl->RenderFrame(renderer, tex, smf->modelframes[i], smf->modelframes[i], inter, actor->skeletonData.Get(), translation);
 			else
 				mdl->RenderFrame(renderer, tex, smf->modelframes[i], smf->modelframes[i], 0.f, actor->skeletonData.Get(), translation);
 		}
@@ -724,6 +726,10 @@ static void ParseModelDefLump(int Lump)
 						GetDefaultByType(type)->hasmodel = true;
 						map[c]=1;
 					}
+				}
+				else if (sc.Compare("interpolatesameframe"))
+				{
+					smf.flags |= MDL_INTERPOLATESAMEFRAME;
 				}
 				else if (sc.Compare("dontcullbackfaces"))
 				{

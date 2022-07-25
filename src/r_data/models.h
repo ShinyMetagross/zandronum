@@ -45,18 +45,19 @@ enum
 {
 	// [BB] Color translations for the model skin are ignored. This is
 	// useful if the skin texture is not using the game palette.
-	MDL_IGNORETRANSLATION			= 1,
-	MDL_PITCHFROMMOMENTUM			= 2,
-	MDL_ROTATING					= 4,
-	MDL_INTERPOLATEDOUBLEDFRAMES	= 8,
-	MDL_NOINTERPOLATION				= 16,
-	MDL_USEACTORPITCH				= 32,
-	MDL_USEACTORROLL				= 64,
-	MDL_BADROTATION					= 128,
-	MDL_DONTCULLBACKFACES			= 256,
-	MDL_USEROTATIONCENTER			= 512,
-	MDL_NOPERPIXELLIGHTING			= 1024, // forces a model to not use per-pixel lighting. useful for voxel-converted-to-model objects.
-	MDL_SCALEWEAPONFOV				= 2048,	// scale weapon view model with higher user FOVs
+	MDL_IGNORETRANSLATION = 1,
+	MDL_PITCHFROMMOMENTUM = 2,
+	MDL_ROTATING = 4,
+	MDL_INTERPOLATEDOUBLEDFRAMES = 8,
+	MDL_NOINTERPOLATION = 16,
+	MDL_USEACTORPITCH = 32,
+	MDL_USEACTORROLL = 64,
+	MDL_BADROTATION = 128,
+	MDL_DONTCULLBACKFACES = 256,
+	MDL_USEROTATIONCENTER = 512,
+	MDL_NOPERPIXELLIGHTING = 1024, // forces a model to not use per-pixel lighting. useful for voxel-converted-to-model objects.
+	MDL_SCALEWEAPONFOV = 2048,	// scale weapon view model with higher user FOVs
+	MDL_INTERPOLATESAMEFRAME = 4096, //Forces interpolation of the same frame, useful for skeletal models
 };
 
 FSpriteModelFrame * FindModelFrame(const PClass * ti, int sprite, int frame, bool dropped);
