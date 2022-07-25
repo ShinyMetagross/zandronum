@@ -6083,13 +6083,12 @@ DEFINE_ACTION_FUNCTION(AActor, BloodSplatter)
 //
 //----------------------------------------------------------------------------
 
-void DActorSkeletalData::Serialize(FSerializer& arc)
+/*void DActorSkeletalData::Serialize(FSerializer& arc)
 {
 	Super::Serialize(arc);
-	arc("move", move)
-		("rotation", rotation)
-		("scale", scale);
-}
+	arc("transform", transform)
+		("oldTransform", oldTransform);
+}*/
 
 //---------------------------------------------------------------------------
 //

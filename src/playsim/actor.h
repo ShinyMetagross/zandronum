@@ -47,6 +47,8 @@
 #include "g_level.h"
 #include "tflags.h"
 #include "portal.h"
+#include "matrix.h"
+
 
 struct subsector_t;
 struct FBlockNode;
@@ -707,23 +709,15 @@ class DActorSkeletalData : public DObject
 {
 	DECLARE_CLASS(DActorSkeletalData, DObject);
 public:
-	TArray<DVector3>	move;
-	TArray<DVector3>	rotation;
-	TArray<DVector3>	scale;
+	TArray<VSMatrix> oldTransform;
+	TArray<VSMatrix> transform;
 
 	DActorSkeletalData() = default;
-	virtual void Serialize(FSerializer& arc) override;
-	void SetMove(DVector3& off, int bone)
+	//virtual void Serialize(FSerializer& arc) override;
+	void SetTransform(VSMatrix transform2, uint8_t id)
 	{
-		move[bone] = off;
-	}
-	void SetRotation(DVector3& off, int bone)
-	{
-		rotation[bone] = off;
-	}
-	void SetScale(DVector3& off, int bone)
-	{
-		scale[bone] = off;
+		oldTransform[id] = transform[id];
+		transform[id] = transform2;
 	}
 };
 

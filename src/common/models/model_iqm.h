@@ -133,6 +133,7 @@ private:
 	TArray<IQMPose> Poses;
 	TArray<IQMAnim> Anims;
 	TArray<VSMatrix> FrameTransforms;
+	TArray<VSMatrix> rawTransforms;
 	TArray<IQMBounds> Bounds;
 	TArray<IQMVertexArray> VertexArrays;
 	uint32_t NumVertices = 0;

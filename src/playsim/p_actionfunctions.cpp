@@ -70,6 +70,7 @@
 #include "actorinlines.h"
 #include "types.h"
 #include "model.h"
+#include "matrix.h"
 
 static FRandom pr_camissile ("CustomActorfire");
 static FRandom pr_cabullet ("CustomBullet");
@@ -5069,38 +5070,28 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 	if (mobj->skeletonData == nullptr)
 	{
 		auto ptr = Create<DActorSkeletalData>();
-		ptr->move = *new TArray<DVector3>();
-		ptr->rotation = *new TArray<DVector3>();
-		ptr->scale = *new TArray<DVector3>();
+		ptr->transform = *new TArray<VSMatrix>();
+		ptr->oldTransform = *new TArray<VSMatrix>();
 		mobj->skeletonData = ptr;
 		GC::WriteBarrier(mobj, ptr);
 	}
 
-	while (bone >= mobj->skeletonData->move.Size())
+	while (bone >= mobj->skeletonData->transform.Size())
 	{
-		mobj->skeletonData->move.Push(DVector3());
-		mobj->skeletonData->move.Last().Zero();
-	}
-	while (bone >= mobj->skeletonData->rotation.Size())
-	{
-		mobj->skeletonData->rotation.Push(DVector3());
-		mobj->skeletonData->rotation.Last().Zero();
-	}
-	while (bone >= mobj->skeletonData->scale.Size())
-	{
-		mobj->skeletonData->scale.Push(DVector3());
-		mobj->skeletonData->scale.Last().Zero();
+		mobj->skeletonData->transform.Push(VSMatrix());
+		mobj->skeletonData->transform.Last().loadIdentity();
+		mobj->skeletonData->oldTransform.Push(VSMatrix());
+		mobj->skeletonData->oldTransform.Last().loadIdentity();
 	}
 
-	mobj->skeletonData->move[bone].X = moveX;
-	mobj->skeletonData->move[bone].Y = moveY;
-	mobj->skeletonData->move[bone].Z = moveZ;
-	mobj->skeletonData->rotation[bone].X = rotX;
-	mobj->skeletonData->rotation[bone].Y = rotY;
-	mobj->skeletonData->rotation[bone].Z = rotZ;
-	mobj->skeletonData->scale[bone].X = scaleX;
-	mobj->skeletonData->scale[bone].Y = scaleY;
-	mobj->skeletonData->scale[bone].Z = scaleZ;
+	VSMatrix newTransform;
+	newTransform.loadIdentity();
+	newTransform.translate(moveX, moveY, moveZ);
+	newTransform.rotate(rotX, 1.0, 0.0, 0.0);
+	newTransform.rotate(rotY, 0.0, 1.0, 0.0);
+	newTransform.rotate(rotZ, 0.0, 0.0, 1.0);
+	newTransform.scale(scaleX, scaleY, scaleZ);
+	mobj->skeletonData->SetTransform(newTransform, bone);
 
 	return 0;
 }

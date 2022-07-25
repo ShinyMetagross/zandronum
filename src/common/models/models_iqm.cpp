@@ -169,6 +169,7 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 			}
 		}
 
+		rawTransforms.Resize(num_frames * num_poses);
 		FrameTransforms.Resize(num_frames * num_poses);
 		reader.SeekTo(ofs_frames);
 		for (uint32_t i = 0; i < num_frames; i++)
@@ -199,6 +200,9 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 				m.translate(translate.X, translate.Y, translate.Z);
 				m.multQuaternion(quaternion);
 				m.scale(scale.X, scale.Y, scale.Z);
+
+				//We probably need to concatenate once we have all our transformations we want, so let's store raw values here if needed.
+				rawTransforms[i * num_poses + j] = m;
 
 				// Concatenate each pose with the inverse base pose to avoid doing this at animation time.
 				// If the joint has a parent, then it needs to be pre-concatenated with its parent's base pose.
@@ -418,10 +422,48 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 	float invt = 1.0f - t;
 
 	TArray<VSMatrix> bones(numbones, true);
+	TArray<VSMatrix> bonePositions = FrameTransforms;
 	for (int i = 0; i < numbones; i++)
 	{
-		const float* from = FrameTransforms[offset1 + i].get();
-		const float* to = FrameTransforms[offset2 + i].get();
+		VSMatrix pos1;
+		VSMatrix pos2;
+		pos1.loadIdentity();
+		pos2.loadIdentity();
+		if (skeleton != nullptr)
+		{
+			if (skeleton->transform.Size() > i)
+			{
+				VSMatrix pos1mod = rawTransforms[offset1 + i];
+				VSMatrix pos2mod = rawTransforms[offset2 + i];
+
+				pos1mod.multMatrix(skeleton->oldTransform[i]);
+				pos2mod.multMatrix(skeleton->transform[i]);
+
+				if (Joints[i].Parent >= 0)
+				{
+					pos1 = baseframe[Joints[i].Parent];		
+					pos1.multMatrix(pos1mod);	
+					pos1.multMatrix(inversebaseframe[i]);
+
+					pos2 = baseframe[Joints[i].Parent];
+					pos2.multMatrix(pos2mod);
+					pos2.multMatrix(inversebaseframe[i]);
+				}
+				else
+				{
+					pos1 = pos1mod;
+					pos1.multMatrix(inversebaseframe[i]);
+
+					pos2 = pos2mod;
+					pos2.multMatrix(inversebaseframe[i]);
+				}
+				bonePositions[offset1 + i] = pos1;
+				bonePositions[offset2 + i] = pos2;
+			}
+		}
+
+		const float* from = bonePositions[offset1 + i].get();
+		const float* to = bonePositions[offset2 + i].get();
 
 		// Interpolate bone between the two frames
 		float bone[16];
@@ -439,48 +481,6 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 		else
 		{
 			bones[i].loadMatrix(bone);
-		}
-
-		if (skeleton != nullptr)
-		{
-			VSMatrix position;
-			position.loadIdentity();
-			bool editedBone = false;
-			if (skeleton->move.Size() > i)
-			{
-				if (!skeleton->move[i].isZero())
-				{
-					position.translate(skeleton->move[i].X, skeleton->move[i].Y, skeleton->move[i].Z);
-					editedBone = true;
-				}
-				if (!skeleton->rotation[i].isZero())
-				{
-					position.rotate(skeleton->rotation[i].X, 1.0, 0.0, 0.0);
-					position.rotate(skeleton->rotation[i].Y, 0.0, 1.0, 0.0);
-					position.rotate(skeleton->rotation[i].Z, 0.0, 0.0, 1.0);
-					editedBone = true;
-				}
-				if (!skeleton->scale[i].isZero())
-				{
-					position.scale(skeleton->scale[i].X, skeleton->scale[i].Y, skeleton->scale[i].Z);
-					editedBone = true;
-				}
-
-				if (editedBone)
-				{
-					if (Joints[i].Parent >= 0)
-					{
-						bones[i] = baseframe[Joints[i].Parent];
-						bones[i].multMatrix(position);
-						bones[i].multMatrix(inversebaseframe[i]);
-					}
-					else
-					{
-						bones[i] = position;
-						bones[i].multMatrix(inversebaseframe[i]);
-					}
-				}
-			}
 		}
 	}
 

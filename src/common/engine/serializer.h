@@ -7,6 +7,7 @@
 #include "file_zip.h"
 #include "tflags.h"
 #include "vectors.h"
+#include "matrix.h"
 #include "palentry.h"
 #include "name.h"
 #include "dictionary.h"
@@ -335,6 +336,11 @@ inline FSerializer& Serialize(FSerializer& arc, const char* key, FVector2& p, FV
 {
 	return arc.Array<float>(key, &p[0], def ? &(*def)[0] : nullptr, 2, true);
 }
+
+/*inline FSerializer& Serialize(FSerializer& arc, const char* key, VSMatrix& p, VSMatrix* def)
+{
+	return arc.Array(key, &p.get()[0], def ? &(*def).get()[0] : nullptr, 16, true);
+}*/
 
 template<class T>
 inline FSerializer &Serialize(FSerializer &arc, const char *key, TAngle<T> &p, TAngle<T> *def)
