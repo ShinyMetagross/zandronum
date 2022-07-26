@@ -117,7 +117,7 @@ public:
 	virtual void LoadGeometry();
 	virtual void AddSkins(uint8_t *hitlist);
 	virtual bool AttachAnimations(int id) override;
-	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) override;
+	DVector3 ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton) override;
 
 	void UnloadGeometry();
 	void BuildVertexBuffer(FModelRenderer *renderer);
@@ -134,7 +134,7 @@ public:
 	virtual bool Load(const char * fn, int lumpnum, const char * buffer, int length);
 	virtual void LoadGeometry();
 	virtual bool AttachAnimations(int id) override;
-	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) override;
+	DVector3 ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton) override;
 };
 
 

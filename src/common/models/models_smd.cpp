@@ -398,9 +398,8 @@ bool FSMDModel::AttachAnimations(int id)
 	return true;
 }
 
-bool FSMDModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+DVector3 FSMDModel::ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton)
 {
-	return false;
+	return DVector3(0, 0, 0);
 }
-
 

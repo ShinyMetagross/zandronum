@@ -547,8 +547,61 @@ bool IQMModel::AttachAnimations(int id)
 	return false;
 }
 
-bool IQMModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+DVector3 IQMModel::ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton)
 {
-	return false;
-}
+	DVector3 result = DVector3(0, 0, 0);
+	int frame = curSpriteMDLFrame->modelframes[0];
+	int numbones = Joints.Size();
 
+	VSMatrix framePosition = rawTransforms[curSpriteMDLFrame->modelframes[0] * numbones + bone];
+
+	if (skeleton != nullptr)
+		framePosition.multMatrix(skeleton->transform[bone]);
+
+	double scalarX1 = framePosition.get()[0];
+	double scalarX2 = framePosition.get()[4];
+	double scalarX3 = framePosition.get()[8];
+
+	double scalarY1 = framePosition.get()[1];
+	double scalarY2 = framePosition.get()[5];
+	double scalarY3 = framePosition.get()[9];
+
+	double scalarZ1 = framePosition.get()[2];
+	double scalarZ2 = framePosition.get()[6];
+	double scalarZ3 = framePosition.get()[10];
+
+	double scalingFactorX = sqrt(scalarX1 * scalarX1 + scalarX2 * scalarX2 + scalarX3 * scalarX3);
+	double scalingFactorY = sqrt(scalarY1 * scalarY1 + scalarY2 * scalarY2 + scalarY3 * scalarY3);
+	double scalingFactorZ = sqrt(scalarZ1 * scalarZ1 + scalarZ2 * scalarZ2 + scalarZ3 * scalarZ3);
+
+	double scalingFactor = sqrt(scalingFactorX * scalingFactorX + scalingFactorY * scalingFactorY + scalingFactorZ * scalingFactorZ);
+
+	VSMatrix rotationMatrix;
+	rotationMatrix = framePosition;
+	rotationMatrix.multMatrix(1.0 / scalingFactor);
+
+	switch (alias)
+	{
+		default: 
+			return DVector3(0, 0, 0); 
+		case 1:
+			result.X = framePosition.get()[12];
+			result.Y = framePosition.get()[13];
+			result.Z = framePosition.get()[14];
+			break;
+		case 2:
+			result.X = framePosition.get()[3];
+			result.Y = framePosition.get()[7];
+			result.Z = framePosition.get()[11];
+			break;
+		case 3:
+			result.X = scalingFactorX;
+			result.Y = scalingFactorY;
+			result.Z = scalingFactorZ;
+			break;
+	}
+
+	Printf("[ %f, %f, %f, %f,\n %f, %f, %f, %f,\n %f, %f, %f, %f,\n %f, %f, %f, 1.0 ]\n",
+		framePosition.get()[0], framePosition.get()[1], framePosition.get()[2], framePosition.get()[3], framePosition.get()[4], framePosition.get()[5], framePosition.get()[6], framePosition.get()[7], framePosition.get()[8], framePosition.get()[9], framePosition.get()[10], framePosition.get()[11], framePosition.get()[13], framePosition.get()[14]);
+	return result;
+}

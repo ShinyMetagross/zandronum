@@ -113,7 +113,7 @@ public:
 	void BuildVertexBuffer(FModelRenderer* renderer) override;
 	void AddSkins(uint8_t* hitlist) override;
 	virtual bool AttachAnimations(int id) override;
-	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) override;
+	DVector3 ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton) override;
 
 private:
 	void LoadGeometry();

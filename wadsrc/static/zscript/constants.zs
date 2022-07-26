@@ -1205,6 +1205,13 @@ enum RadiusDamageFlags
 	RADF_OLDRADIUSDAMAGE = 32
 };
 
+enum GBTFlags
+{
+	GBT_TRANSLATION = 1,
+	GBT_ROTATION = 1 << 1,
+	GBT_SCALE = 1 << 2
+};
+
 enum IntermissionSequenceType
 {
 	FSTATE_EndingGame = 0,

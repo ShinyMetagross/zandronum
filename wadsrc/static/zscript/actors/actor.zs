@@ -1240,6 +1240,7 @@ class Actor : Thinker native
 	native bool A_RemoveLight(Name lightid);
 
 	action native void A_ManipulateBone(int bone, double moveX, double moveY = 0, double moveZ = 0, double rotX = 0, double rotY = 0, double rotZ = 0, double scaleX = 1, double scaleY = 1, double scaleZ = 1);
+	action native Vector3 A_GetBoneTransform(int Bone, int transformation);
 
 	int ACS_NamedExecute(name script, int mapnum=0, int arg1=0, int arg2=0, int arg3=0)
 	{

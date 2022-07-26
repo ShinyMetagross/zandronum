@@ -70,6 +70,8 @@
 #include "actorinlines.h"
 #include "types.h"
 #include "model.h"
+#include "models.h"
+#include "vectors.h"
 #include "matrix.h"
 
 static FRandom pr_camissile ("CustomActorfire");
@@ -5041,7 +5043,6 @@ DEFINE_ACTION_FUNCTION(AActor, GetRenderStyle)
 //
 //==========================================================================
 
-
 DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 {
 	PARAM_ACTION_PROLOGUE(AActor);
@@ -5049,9 +5050,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 	PARAM_FLOAT(moveX);
 	PARAM_FLOAT(moveY);
 	PARAM_FLOAT(moveZ);
-	PARAM_FLOAT(rotX);
-	PARAM_FLOAT(rotY);
-	PARAM_FLOAT(rotZ);
+	PARAM_ANGLE(rotX);
+	PARAM_ANGLE(rotY);
+	PARAM_ANGLE(rotZ);
 	PARAM_FLOAT(scaleX);
 	PARAM_FLOAT(scaleY);
 	PARAM_FLOAT(scaleZ);
@@ -5089,12 +5090,59 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 	VSMatrix newTransform;
 	newTransform.loadIdentity();
 	newTransform.translate(moveX, moveY, moveZ);
-	newTransform.rotate(rotX, 1.0, 0.0, 0.0);
-	newTransform.rotate(rotY, 0.0, 1.0, 0.0);
-	newTransform.rotate(rotZ, 0.0, 0.0, 1.0);
+	newTransform.rotate(rotX.Normalized180().Degrees, 1.0, 0.0, 0.0);
+	newTransform.rotate(rotY.Normalized180().Degrees, 0.0, 1.0, 0.0);
+	newTransform.rotate(rotZ.Normalized180().Degrees, 0.0, 0.0, 1.0);
 	newTransform.scale(scaleX, scaleY, scaleZ);
 	mobj->skeletonData->SetTransform(newTransform, bone);
 	mobj->skeletonData->moddedBone[bone] = true;
 
 	return 0;
+}
+
+//==========================================================================
+//
+// A_GetBoneTransform(name Bone, int transformation, int index);
+//
+//==========================================================================
+
+enum GBTFlags
+{
+	GBT_TRANSLATION = 1,
+	GBT_ROTATION = 1 << 1,
+	GBT_SCALE = 1 << 2
+};
+
+DEFINE_ACTION_FUNCTION(AActor, A_GetBoneTransform)
+{
+	PARAM_ACTION_PROLOGUE(AActor);
+	PARAM_INT(bone);
+	PARAM_INT(transformation);
+
+	if (self == nullptr)
+		ACTION_RETURN_BOOL(false);
+
+	if (bone < 0)
+	{
+		Printf("Attempt to pass invalid bone in %s.", self->GetCharacterName());
+		ACTION_RETURN_BOOL(false);
+	}
+
+	AActor* mobj = ACTION_CALL_FROM_PSPRITE() || ACTION_CALL_FROM_INVENTORY() ? self : stateowner;
+
+	DVector3 position;
+
+	FSpriteModelFrame* smf = FindModelFrame(mobj->GetClass(), mobj->sprite, mobj->frame, false);
+	FModel* mdl = Models[smf->modelIDs[0]];
+
+	DActorSkeletalData* skeleton = mobj->skeletonData != nullptr ? mobj->skeletonData : nullptr;
+
+	if (transformation & GBT_TRANSLATION)
+		position = mdl->ReturnBoneTransform(0, bone, 1, skeleton);
+	else if (transformation & GBT_ROTATION)
+		position = mdl->ReturnBoneTransform(0, bone, 2, skeleton);
+	else if (transformation & GBT_SCALE)
+		position = mdl->ReturnBoneTransform(0, bone, 3, skeleton);
+
+	ACTION_RETURN_VEC3(position);
 }

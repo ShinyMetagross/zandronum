@@ -66,7 +66,7 @@ public:
 	virtual void BuildVertexBuffer(FModelRenderer *renderer) = 0;
 	virtual void AddSkins(uint8_t *hitlist) = 0;
 	virtual bool AttachAnimations(int id) = 0;
-	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) = 0;
+	virtual DVector3 ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton) = 0;
 	virtual float getAspectFactor(float vscale) { return 1.f; }
 
 	void SetVertexBuffer(int type, IModelVertexBuffer *buffer) { mVBuf[type] = buffer; }

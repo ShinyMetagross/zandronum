@@ -424,7 +424,7 @@ bool FVoxelModel::AttachAnimations(int id)
 //
 //===========================================================================
 
-bool FVoxelModel::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+DVector3 FVoxelModel::ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton)
 {
-	return false;
+	return DVector3(0, 0, 0);
 }

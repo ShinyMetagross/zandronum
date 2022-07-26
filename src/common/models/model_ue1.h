@@ -32,7 +32,7 @@ public:
 	void LoadGeometry();
 	void UnloadGeometry();
 	virtual bool AttachAnimations(int id) override;
-	virtual bool ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ) override;
+	DVector3 ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton) override;
 	FUE1Model()
 	{
 		mDataLump = -1;

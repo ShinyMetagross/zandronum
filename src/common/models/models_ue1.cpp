@@ -325,7 +325,7 @@ bool FUE1Model::AttachAnimations(int id)
 	return false;
 }
 
-bool FUE1Model::ManipulateBones(float moveX, float moveY, float moveZ, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ)
+DVector3 FUE1Model::ReturnBoneTransform(int index, int bone, int alias, DActorSkeletalData* skeleton)
 {
-	return false;
+	return DVector3(0, 0, 0);
 }
