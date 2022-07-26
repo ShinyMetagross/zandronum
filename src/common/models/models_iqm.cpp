@@ -427,14 +427,15 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 		VSMatrix framePosition1 = FrameTransforms[offset1 + i];
 		VSMatrix framePosition2 = FrameTransforms[offset2 + i];
 
-		VSMatrix pos1;
-		VSMatrix pos2;
-		pos1.loadIdentity();
-		pos2.loadIdentity();
 		if (skeleton != nullptr)
 		{
-			if (skeleton->transform.Size() > i)
+			if (skeleton->transform.Size() > i && skeleton->moddedBone[i])
 			{
+				VSMatrix pos1;
+				VSMatrix pos2;
+				pos1.loadIdentity();
+				pos2.loadIdentity();
+
 				VSMatrix pos1mod = rawTransforms[offset1 + i];
 				VSMatrix pos2mod = rawTransforms[offset2 + i];
 

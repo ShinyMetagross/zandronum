@@ -5072,6 +5072,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 		auto ptr = Create<DActorSkeletalData>();
 		ptr->transform = *new TArray<VSMatrix>();
 		ptr->oldTransform = *new TArray<VSMatrix>();
+		ptr->moddedBone = *new TArray<bool>();
 		mobj->skeletonData = ptr;
 		GC::WriteBarrier(mobj, ptr);
 	}
@@ -5082,6 +5083,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 		mobj->skeletonData->transform.Last().loadIdentity();
 		mobj->skeletonData->oldTransform.Push(VSMatrix());
 		mobj->skeletonData->oldTransform.Last().loadIdentity();
+		mobj->skeletonData->moddedBone.Push(false);
 	}
 
 	VSMatrix newTransform;
@@ -5092,6 +5094,7 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 	newTransform.rotate(rotZ, 0.0, 0.0, 1.0);
 	newTransform.scale(scaleX, scaleY, scaleZ);
 	mobj->skeletonData->SetTransform(newTransform, bone);
+	mobj->skeletonData->moddedBone[bone] = true;
 
 	return 0;
 }

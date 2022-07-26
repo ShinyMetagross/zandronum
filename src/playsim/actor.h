@@ -711,6 +711,7 @@ class DActorSkeletalData : public DObject
 public:
 	TArray<VSMatrix> oldTransform;
 	TArray<VSMatrix> transform;
+	TArray<bool> moddedBone;
 
 	DActorSkeletalData() = default;
 	//virtual void Serialize(FSerializer& arc) override;
