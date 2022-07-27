@@ -95,6 +95,7 @@ class VSMatrix {
 		}
 		bool inverseMatrix(VSMatrix &result);
 		void transpose();
+		DVector3 eulerAngles(const DMatrix3x3& R);
 
 	protected:
 		static void crossProduct(const FLOATTYPE *a, const FLOATTYPE *b, FLOATTYPE *res);

@@ -5090,9 +5090,9 @@ DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
 	VSMatrix newTransform;
 	newTransform.loadIdentity();
 	newTransform.translate(moveX, moveY, moveZ);
-	newTransform.rotate(rotX.Normalized180().Degrees, 1.0, 0.0, 0.0);
-	newTransform.rotate(rotY.Normalized180().Degrees, 0.0, 1.0, 0.0);
-	newTransform.rotate(rotZ.Normalized180().Degrees, 0.0, 0.0, 1.0);
+	newTransform.rotate(rotX.Degrees, 1.0, 0.0, 0.0);
+	newTransform.rotate(rotY.Degrees, 0.0, 1.0, 0.0);
+	newTransform.rotate(rotZ.Degrees, 0.0, 0.0, 1.0);
 	newTransform.scale(scaleX, scaleY, scaleZ);
 	mobj->skeletonData->SetTransform(newTransform, bone);
 	mobj->skeletonData->moddedBone[bone] = true;

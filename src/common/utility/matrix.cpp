@@ -498,6 +498,46 @@ VSMatrix::multMatrix(FLOATTYPE *resMat, const FLOATTYPE *aMatrix)
 	memcpy(resMat, res, 16 * sizeof(FLOATTYPE));
 }
 
+bool closeEnough(const float& a, const float& b, const float& epsilon = std::numeric_limits<float>::epsilon()) {
+	return (epsilon > std::abs(a - b));
+}
+
+DVector3 VSMatrix::eulerAngles(const DMatrix3x3& R) {
+
+	//check for gimbal lock
+	if (closeEnough(R[0][2], -1.0f)) {
+		float x = 0; //gimbal lock, value of x doesn't matter
+		float y = 3.14159265 / 2;
+		float z = x + atan2(R[1][0], R[2][0]);
+		return { x, y, z };
+	}
+	else if (closeEnough(R[0][2], 1.0f)) {
+		float x = 0;
+		float y = -3.14159265 / 2;
+		float z = -x + atan2(-R[1][0], -R[2][0]);
+		return { x, y, z };
+	}
+	else { //two solutions exist
+		float x1 = -asin(R[0][2]);
+		float x2 = 3.14159265 - x1;
+
+		float y1 = atan2(R[1][2] / cos(x1), R[2][2] / cos(x1));
+		float y2 = atan2(R[1][2] / cos(x2), R[2][2] / cos(x2));
+
+		float z1 = atan2(R[0][1] / cos(x1), R[0][0] / cos(x1));
+		float z2 = atan2(R[0][1] / cos(x2), R[0][0] / cos(x2));
+
+		//choose one solution to return
+		//for example the "shortest" rotation
+		if ((std::abs(x1) + std::abs(y1) + std::abs(z1)) <= (std::abs(x2) + std::abs(y2) + std::abs(z2))) {
+			return { x1, y1, z1 };
+		}
+		else {
+			return { x2, y2, z2 };
+		}
+	}
+}
+
 static double mat3Determinant(const FLOATTYPE *mMat3x3)
 {
 	return mMat3x3[0] * (mMat3x3[4] * mMat3x3[8] - mMat3x3[5] * mMat3x3[7]) +

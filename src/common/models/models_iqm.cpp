@@ -6,6 +6,7 @@
 #include "modelrenderer.h"
 #include "engineerrors.h"
 #include "r_utility.h"
+#include <math.h>
 
 
 IQMModel::IQMModel()
@@ -574,12 +575,6 @@ DVector3 IQMModel::ReturnBoneTransform(int index, int bone, int alias, DActorSke
 	double scalingFactorY = sqrt(scalarY1 * scalarY1 + scalarY2 * scalarY2 + scalarY3 * scalarY3);
 	double scalingFactorZ = sqrt(scalarZ1 * scalarZ1 + scalarZ2 * scalarZ2 + scalarZ3 * scalarZ3);
 
-	double scalingFactor = sqrt(scalingFactorX * scalingFactorX + scalingFactorY * scalingFactorY + scalingFactorZ * scalingFactorZ);
-
-	VSMatrix rotationMatrix;
-	rotationMatrix = framePosition;
-	rotationMatrix.multMatrix(1.0 / scalingFactor);
-
 	switch (alias)
 	{
 		default: 
@@ -590,9 +585,32 @@ DVector3 IQMModel::ReturnBoneTransform(int index, int bone, int alias, DActorSke
 			result.Z = framePosition.get()[14];
 			break;
 		case 2:
-			result.X = framePosition.get()[3];
-			result.Y = framePosition.get()[7];
-			result.Z = framePosition.get()[11];
+			DMatrix3x3 rotationSub;
+			rotationSub[0][0] = framePosition.get()[0];
+			rotationSub[0][1] = framePosition.get()[1];
+			rotationSub[0][2] = framePosition.get()[2];
+
+			rotationSub[1][0] = framePosition.get()[4];
+			rotationSub[1][1] = framePosition.get()[5];
+			rotationSub[1][2] = framePosition.get()[6];
+
+			rotationSub[2][0] = framePosition.get()[8];
+			rotationSub[2][1] = framePosition.get()[9];
+			rotationSub[2][2] = framePosition.get()[10];
+
+			DMatrix3x3 rotationMatrix_X = (1.0 / scalingFactorX) * rotationSub;
+			DMatrix3x3 rotationMatrix_Y = (1.0 / scalingFactorY) * rotationSub;
+			DMatrix3x3 rotationMatrix_Z = (1.0 / scalingFactorZ) * rotationSub;
+
+			result = framePosition.eulerAngles(rotationMatrix_X) * (180 / 3.14159265);
+
+			if (result.X < 0)
+				result.X += 360.0f;
+			if (result.Y < 0)
+				result.Y += 360.0f;
+			if (result.Z < 0)
+				result.Z += 360.0f;
+
 			break;
 		case 3:
 			result.X = scalingFactorX;
@@ -601,7 +619,7 @@ DVector3 IQMModel::ReturnBoneTransform(int index, int bone, int alias, DActorSke
 			break;
 	}
 
-	Printf("[ %f, %f, %f, %f,\n %f, %f, %f, %f,\n %f, %f, %f, %f,\n %f, %f, %f, 1.0 ]\n",
-		framePosition.get()[0], framePosition.get()[1], framePosition.get()[2], framePosition.get()[3], framePosition.get()[4], framePosition.get()[5], framePosition.get()[6], framePosition.get()[7], framePosition.get()[8], framePosition.get()[9], framePosition.get()[10], framePosition.get()[11], framePosition.get()[13], framePosition.get()[14]);
+	//Printf("[ %f, %f, %f, %f,\n %f, %f, %f, %f,\n %f, %f, %f, %f,\n %f, %f, %f, 1.0 ]\n",
+		//framePosition.get()[0], framePosition.get()[1], framePosition.get()[2], framePosition.get()[3], framePosition.get()[4], framePosition.get()[5], framePosition.get()[6], framePosition.get()[7], framePosition.get()[8], framePosition.get()[9], framePosition.get()[10], framePosition.get()[11], framePosition.get()[13], framePosition.get()[14]);
 	return result;
 }
