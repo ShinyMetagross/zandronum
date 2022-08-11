@@ -216,7 +216,7 @@ static const char *shaderBindings = R"(
 
 		vec4 uDetailParms;
 		vec4 uNpotEmulation;
-		vec4 padding1, padding2, padding3;
+		vec4 padding2, padding3;
 	};
 
 	layout(set = 1, binding = 2, std140) uniform StreamUBO {
@@ -227,6 +227,12 @@ static const char *shaderBindings = R"(
 	layout(set = 1, binding = 3, std430) buffer LightBufferSSO
 	{
 	    vec4 lights[];
+	};
+
+	// bone matrix buffers
+	layout(set = 1, binding = 4, std430) buffer BoneBufferSSO
+	{
+	    mat4 bones[];
 	};
 
 	// textures
@@ -262,8 +268,11 @@ static const char *shaderBindings = R"(
 		// Blinn glossiness and specular level
 		vec2 uSpecularMaterial;
 
+		// bone animation
+		int uBoneIndexBase;
+
 		int uDataIndex;
-		int padding1, padding2, padding3;
+		int padding2, padding3;
 	};
 
 	// material types
