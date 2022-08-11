@@ -141,8 +141,9 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 			anim.Loop = !!(reader.ReadUInt32() & 1);
 		}
 
-		TArray<VSMatrix> baseframe(num_joints, true);
-		TArray<VSMatrix> inversebaseframe(num_joints, true);
+		baseframe.Resize(num_joints);
+		inversebaseframe.Resize(num_joints);
+
 		for (uint32_t i = 0; i < num_joints; i++)
 		{
 			const IQMJoint& j = Joints[i];
@@ -434,12 +435,20 @@ int IQMModel::FindFrame(const char* name)
 	return -1;
 }
 
-void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation, const FTextureID* surfaceskinids)
+void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation, const FTextureID* surfaceskinids, TArray<VSMatrix> animationData)
 {
-	frame1 = clamp(frame1, 0, (int)FrameTransforms.Size() - 1);
-	frame2 = clamp(frame2, 0, (int)FrameTransforms.Size() - 1);
+	TArray<VSMatrix> animationFrames = animationData.Size() > 0 ? animationData : FrameTransforms;
+
+	if (animationFrames.Size() == 0)
+	{
+		animationFrames = baseframe;
+	}
 
 	int numbones = Joints.Size();
+
+	frame1 = clamp(frame1, 0, ((int)animationFrames.Size() - 1)/numbones);
+	frame2 = clamp(frame2, 0, ((int)animationFrames.Size() - 1)/numbones);
+	
 	int offset1 = frame1 * numbones;
 	int offset2 = frame2 * numbones;
 	float t = (float)inter;
@@ -448,8 +457,8 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 	TArray<VSMatrix> bones(numbones, true);
 	for (int i = 0; i < numbones; i++)
 	{
-		const float* from = FrameTransforms[offset1 + i].get();
-		const float* to = FrameTransforms[offset2 + i].get();
+		const float* from = animationFrames[offset1 + i].get();
+		const float* to = animationFrames[offset2 + i].get();
 
 		// Interpolate bone between the two frames
 		float bone[16];
@@ -479,10 +488,18 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 
 		if (!meshSkin)
 		{
-			if (surfaceskinids && surfaceskinids[i].isValid()) 
+			if (surfaceskinids && surfaceskinids[i].isValid())
+			{
 				meshSkin = TexMan.GetGameTexture(surfaceskinids[i], true);
-			else if (!Meshes[i].Skin.isValid()) continue;
-			else meshSkin = TexMan.GetGameTexture(Meshes[i].Skin, true);
+			}
+			else if (!Meshes[i].Skin.isValid())
+			{
+				continue;
+			}
+			else 
+			{
+				meshSkin = TexMan.GetGameTexture(Meshes[i].Skin, true);
+			}
 			if (!meshSkin) continue;
 		}
 
@@ -519,11 +536,14 @@ void IQMModel::BuildVertexBuffer(FModelRenderer* renderer)
 
 void IQMModel::AddSkins(uint8_t* hitlist, const FTextureID* surfaceskinids)
 {
-	for (IQMMesh& mesh : Meshes)
+	for (int i = 0; i < Meshes.Size(); i++)
 	{
-		if (mesh.Skin.isValid())
-		{
-			hitlist[mesh.Skin.GetIndex()] |= FTextureManager::HIT_Flat;
-		}
+		if (surfaceskinids && surfaceskinids[i].isValid())
+			hitlist[surfaceskinids[i].GetIndex()] |= FTextureManager::HIT_Flat;
 	}
+}
+
+const TArray<VSMatrix>& IQMModel::AttachAnimationData()
+{
+	return FrameTransforms;
 }

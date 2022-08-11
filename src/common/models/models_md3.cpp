@@ -343,7 +343,7 @@ int FMD3Model::FindFrame(const char * name)
 //
 //===========================================================================
 
-void FMD3Model::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation, const FTextureID* surfaceskinids)
+void FMD3Model::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation, const FTextureID* surfaceskinids, TArray<VSMatrix> animationData)
 {
 	if ((unsigned)frameno >= Frames.Size() || (unsigned)frameno2 >= Frames.Size()) return;
 
@@ -379,3 +379,13 @@ void FMD3Model::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int f
 	renderer->SetInterpolation(0.f);
 }
 
+//===========================================================================
+//
+//
+//
+//===========================================================================
+
+const TArray<VSMatrix>& FMD3Model::AttachAnimationData()
+{
+	return {};
+}

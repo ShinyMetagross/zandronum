@@ -363,7 +363,7 @@ int FDMDModel::FindFrame(const char * name)
 //
 //===========================================================================
 
-void FDMDModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation, const FTextureID*)
+void FDMDModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation, const FTextureID*, TArray<VSMatrix> animationData)
 {
 	if (frameno >= info.numFrames || frameno2 >= info.numFrames) return;
 
@@ -379,6 +379,17 @@ void FDMDModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int f
 	renderer->SetupFrame(this, frames[frameno].vindex, frames[frameno2].vindex, lodInfo[0].numTriangles * 3, {});
 	renderer->DrawArrays(0, lodInfo[0].numTriangles * 3);
 	renderer->SetInterpolation(0.f);
+}
+
+//===========================================================================
+//
+// Pointless for this format
+//
+//===========================================================================
+
+const TArray<VSMatrix>& FDMDModel::AttachAnimationData()
+{
+	return {};
 }
 
 
@@ -552,4 +563,3 @@ void FMD2Model::LoadGeometry()
 FMD2Model::~FMD2Model()
 {
 }
-

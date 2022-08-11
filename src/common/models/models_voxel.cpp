@@ -400,10 +400,21 @@ float FVoxelModel::getAspectFactor(float stretch)
 //
 //===========================================================================
 
-void FVoxelModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, int translation, const FTextureID*)
+void FVoxelModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frame, int frame2, double inter, int translation, const FTextureID*, TArray<VSMatrix> animationData)
 {
 	renderer->SetMaterial(skin, true, translation);
 	renderer->SetupFrame(this, 0, 0, 0, {});
 	renderer->DrawElements(mNumIndices, 0);
+}
+
+//===========================================================================
+//
+// Voxels don't use bones
+//
+//===========================================================================
+
+const TArray<VSMatrix>& FVoxelModel::AttachAnimationData()
+{
+	return {};
 }
 

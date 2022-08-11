@@ -227,7 +227,7 @@ int FUE1Model::FindFrame( const char *name )
 	return -1;
 }
 
-void FUE1Model::RenderFrame( FModelRenderer *renderer, FGameTexture *skin, int frame, int frame2, double inter, int translation, const FTextureID* surfaceskinids)
+void FUE1Model::RenderFrame( FModelRenderer *renderer, FGameTexture *skin, int frame, int frame2, double inter, int translation, const FTextureID* surfaceskinids, TArray<VSMatrix> animationData)
 {
 	// the moment of magic
 	if ( (frame >= numFrames) || (frame2 >= numFrames) ) return;
@@ -318,4 +318,9 @@ void FUE1Model::AddSkins( uint8_t *hitlist, const FTextureID* surfaceskinids)
 FUE1Model::~FUE1Model()
 {
 	UnloadGeometry();
+}
+
+const TArray<VSMatrix>& FUE1Model::AttachAnimationData()
+{
+	return {};
 }

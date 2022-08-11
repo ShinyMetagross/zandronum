@@ -628,7 +628,7 @@ int FOBJModel::FindFrame(const char* name)
  * @param inter The amount to interpolate the two frames.
  * @param translation The translation for the skin
  */
-void FOBJModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation, const FTextureID* surfaceskinids)
+void FOBJModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int frameno, int frameno2, double inter, int translation, const FTextureID* surfaceskinids, TArray<VSMatrix> animationData)
 {
 	// Prevent the model from rendering if the frame number is < 0
 	if (frameno < 0 || frameno2 < 0) return;
@@ -699,4 +699,15 @@ FOBJModel::~FOBJModel()
 	uvs.Clear();
 	faces.Clear();
 	surfaces.Clear();
+}
+
+//===========================================================================
+//
+//
+//
+//===========================================================================
+
+const TArray<VSMatrix>& FOBJModel::AttachAnimationData()
+{
+	return {};
 }
