@@ -543,7 +543,7 @@ void IQMModel::AddSkins(uint8_t* hitlist, const FTextureID* surfaceskinids)
 	}
 }
 
-const TArray<VSMatrix>& IQMModel::AttachAnimationData()
+const TArray<VSMatrix>* IQMModel::AttachAnimationData()
 {
-	return FrameTransforms;
+	return &FrameTransforms;
 }

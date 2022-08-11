@@ -67,7 +67,7 @@ public:
 	virtual void BuildVertexBuffer(FModelRenderer *renderer) = 0;
 	virtual void AddSkins(uint8_t *hitlist, const FTextureID* surfaceskinids) = 0;
 	virtual float getAspectFactor(float vscale) { return 1.f; }
-	virtual const TArray<VSMatrix>& AttachAnimationData() = 0;
+	virtual const TArray<VSMatrix>* AttachAnimationData() = 0;
 
 	void SetVertexBuffer(int type, IModelVertexBuffer *buffer) { mVBuf[type] = buffer; }
 	IModelVertexBuffer *GetVertexBuffer(int type) const { return mVBuf[type]; }

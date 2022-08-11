@@ -101,7 +101,7 @@ public:
 	void RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame, int frame2, double inter, int translation, const FTextureID* surfaceskinids, TArray<VSMatrix> animationData) override;
 	void BuildVertexBuffer(FModelRenderer* renderer) override;
 	void AddSkins(uint8_t* hitlist, const FTextureID* surfaceskinids) override;
-	const TArray<VSMatrix>& AttachAnimationData() override;
+	const TArray<VSMatrix>* AttachAnimationData() override;
 };
 
 #endif

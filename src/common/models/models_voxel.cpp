@@ -413,7 +413,7 @@ void FVoxelModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int
 //
 //===========================================================================
 
-const TArray<VSMatrix>& FVoxelModel::AttachAnimationData()
+const TArray<VSMatrix>* FVoxelModel::AttachAnimationData()
 {
 	return {};
 }

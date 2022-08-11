@@ -387,7 +387,7 @@ void FDMDModel::RenderFrame(FModelRenderer *renderer, FGameTexture * skin, int f
 //
 //===========================================================================
 
-const TArray<VSMatrix>& FDMDModel::AttachAnimationData()
+const TArray<VSMatrix>* FDMDModel::AttachAnimationData()
 {
 	return {};
 }

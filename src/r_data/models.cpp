@@ -343,18 +343,18 @@ void RenderFrameModels(FModelRenderer *renderer, FLevelLocals *Level, const FSpr
 			auto& ssids = surfaceskinids.Size() > 0 ? surfaceskinids : smf->surfaceskinIDs;
 			auto ssidp = (unsigned)(i * MD3_MAX_SURFACES) < ssids.Size() ? &ssids[i * MD3_MAX_SURFACES] : nullptr;
 
-			TArray<VSMatrix> animationData = {};
+			const TArray<VSMatrix>* animationData = {};
 
-			if (smf->animationIDs[i] > 0)
+			if (smf->animationIDs[i] >= 0)
 			{
 				FModel* animation = Models[smf->animationIDs[i]];
 				animationData = animation->AttachAnimationData();
 			}
 
 			if (smfNext && modelframe != modelframenext)
-				mdl->RenderFrame(renderer, tex, modelframe, modelframenext, inter, translation, ssidp, animationData);
+				mdl->RenderFrame(renderer, tex, modelframe, modelframenext, inter, translation, ssidp, animationData ? *animationData : TArray<VSMatrix>());
 			else
-				mdl->RenderFrame(renderer, tex, modelframe, modelframe, 0.f, translation, ssidp, animationData);
+				mdl->RenderFrame(renderer, tex, modelframe, modelframe, 0.f, translation, ssidp, animationData ? *animationData : TArray<VSMatrix>());
 		}
 	}
 }

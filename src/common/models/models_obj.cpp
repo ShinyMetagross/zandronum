@@ -707,7 +707,7 @@ FOBJModel::~FOBJModel()
 //
 //===========================================================================
 
-const TArray<VSMatrix>& FOBJModel::AttachAnimationData()
+const TArray<VSMatrix>* FOBJModel::AttachAnimationData()
 {
 	return {};
 }
