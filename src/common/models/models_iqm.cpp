@@ -476,16 +476,16 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 	renderer->SetupFrame(this, 0, 0, NumVertices, bones);
 
 	FGameTexture* lastSkin = nullptr;
-	for (IQMMesh& mesh : Meshes)
+	for (int i = 0; i < Meshes.Size(); i++)
 	{
 		FGameTexture* meshSkin = skin;
 
 		if (!meshSkin)
 		{
-			if (surfaceskinids && surfaceskinids[Meshes.IndexOf(mesh)].isValid()) 
-				meshSkin = TexMan.GetGameTexture(surfaceskinids[Meshes.IndexOf(mesh)], true);
-			else if (!mesh.Skin.isValid()) continue;
-			else meshSkin = TexMan.GetGameTexture(mesh.Skin, true);
+			if (surfaceskinids && surfaceskinids[i].isValid()) 
+				meshSkin = TexMan.GetGameTexture(surfaceskinids[i], true);
+			else if (!Meshes[i].Skin.isValid()) continue;
+			else meshSkin = TexMan.GetGameTexture(Meshes[i].Skin, true);
 			if (!meshSkin) continue;
 		}
 
@@ -495,7 +495,7 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 			lastSkin = meshSkin;
 		}
 
-		renderer->DrawElements(mesh.NumTriangles * 3, mesh.FirstTriangle * 3 * sizeof(unsigned int));
+		renderer->DrawElements(Meshes[i].NumTriangles * 3, Meshes[i].FirstTriangle * 3 * sizeof(unsigned int));
 	}
 }
 
