@@ -218,30 +218,20 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 				}
 			}
 
-			// Swap the axis as we did with the vertices down in LoadGeometry.
-			FVector3 xaxis(0.0f,-1.0f, 0.0f);
-			FVector3 yaxis(0.0f, 0.0f, 1.0f);
-			FVector3 zaxis(1.0f, 0.0f, 0.0f);
-			float swap1[16] =
-			{
-				xaxis.X, yaxis.X, zaxis.X, 0.0f,
-				xaxis.Y, yaxis.Y, zaxis.Y, 0.0f,
-				xaxis.Z, yaxis.Z, zaxis.Z, 0.0f,
-				0.0f, 0.0f, 0.0f, 1.0f,
-			};
-			float swap2[16] =
-			{
-				xaxis.X, xaxis.Y, xaxis.Z, 0.0f,
-				yaxis.X, yaxis.Y, yaxis.Z, 0.0f,
-				zaxis.X, zaxis.Y, zaxis.Z, 0.0f,
-				0.0f, 0.0f, 0.0f, 1.0f,
-			};
+			// Swap YZ axis as we did that with the vertices down in LoadGeometry.
+			// This is an unfortunate side effect of the coordinate system in the gzdoom model rendering system
+			float swapYZ[16] = { 0.0f };
+			swapYZ[0 + 0 * 4] = 1.0f;
+			swapYZ[1 + 2 * 4] = 1.0f;
+			swapYZ[2 + 1 * 4] = 1.0f;
+			swapYZ[3 + 3 * 4] = 1.0f;
+
 			for (uint32_t j = 0; j < num_poses; j++)
 			{
 				VSMatrix m;
-				m.loadMatrix(swap1);
+				m.loadMatrix(swapYZ);
 				m.multMatrix(FrameTransforms[i * num_poses + j]);
-				m.multMatrix(swap2);
+				m.multMatrix(swapYZ);
 				FrameTransforms[i * num_poses + j] = m;
 			}
 		}
@@ -322,12 +312,10 @@ void IQMModel::LoadPosition(IQMFileReader& reader, const IQMVertexArray& vertexA
 	{
 		for (FModelVertex& v : Vertices)
 		{
-			float x = reader.ReadFloat();
-			float y = reader.ReadFloat();
-			float z = reader.ReadFloat();
-			v.x = -y;
-			v.y = z;
-			v.z = x;
+			v.x = reader.ReadFloat();
+			v.z = reader.ReadFloat();
+			v.y = reader.ReadFloat();
+
 			v.lu = lu;
 			v.lv = lv;
 			v.lindex = lindex;
@@ -364,7 +352,8 @@ void IQMModel::LoadNormal(IQMFileReader& reader, const IQMVertexArray& vertexArr
 			float x = reader.ReadFloat();
 			float y = reader.ReadFloat();
 			float z = reader.ReadFloat();
-			v.SetNormal(-y, z, x);
+
+			v.SetNormal(x, z, y);
 		}
 	}
 	else
@@ -379,14 +368,22 @@ void IQMModel::LoadBlendIndexes(IQMFileReader& reader, const IQMVertexArray& ver
 	{
 		for (FModelVertex& v : Vertices)
 		{
-			v.SetBoneSelector(reader.ReadUByte(), reader.ReadUByte(), reader.ReadUByte(), reader.ReadUByte());
+			int x = reader.ReadUByte();
+            int y = reader.ReadUByte();
+            int z = reader.ReadUByte();
+            int w = reader.ReadUByte();
+            v.SetBoneSelector(x, y, z, w);
 		}
 	}
 	else if (vertexArray.Format == IQM_INT && vertexArray.Size == 4)
 	{
 		for (FModelVertex& v : Vertices)
 		{
-			v.SetBoneSelector(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+			int x = reader.ReadInt32();
+			int y = reader.ReadInt32();
+			int z = reader.ReadInt32();
+			int w = reader.ReadInt32();
+			v.SetBoneSelector(x, y, z, w);
 		}
 	}
 	else
