@@ -437,7 +437,7 @@ int IQMModel::FindFrame(const char* name)
 	return -1;
 }
 
-void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation)
+void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation, const FTextureID* surfaceskinids)
 {
 	frame1 = clamp(frame1, 0, (int)FrameTransforms.Size() - 1);
 	frame2 = clamp(frame2, 0, (int)FrameTransforms.Size() - 1);
@@ -479,10 +479,13 @@ void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int fra
 	for (IQMMesh& mesh : Meshes)
 	{
 		FGameTexture* meshSkin = skin;
+
 		if (!meshSkin)
 		{
-			if (!mesh.Skin.isValid()) continue;
-			meshSkin = TexMan.GetGameTexture(mesh.Skin, true);
+			if (surfaceskinids && surfaceskinids[Meshes.IndexOf(mesh)].isValid()) 
+				meshSkin = TexMan.GetGameTexture(surfaceskinids[Meshes.IndexOf(mesh)], true);
+			else if (!mesh.Skin.isValid()) continue;
+			else meshSkin = TexMan.GetGameTexture(mesh.Skin, true);
 			if (!meshSkin) continue;
 		}
 
@@ -517,7 +520,7 @@ void IQMModel::BuildVertexBuffer(FModelRenderer* renderer)
 	}
 }
 
-void IQMModel::AddSkins(uint8_t* hitlist)
+void IQMModel::AddSkins(uint8_t* hitlist, const FTextureID* surfaceskinids)
 {
 	for (IQMMesh& mesh : Meshes)
 	{
