@@ -1084,6 +1084,7 @@ set (PCH_SOURCES
 	common/models/models_voxel.cpp
 	common/models/models_ue1.cpp
 	common/models/models_obj.cpp
+	common/models/models_iqm.cpp
 	common/models/model.cpp
 	common/models/voxels.cpp
 	common/console/c_commandline.cpp
