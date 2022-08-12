@@ -438,7 +438,7 @@ int IQMModel::FindFrame(const char* name)
 
 void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation, const FTextureID* surfaceskinids, const TArray<VSMatrix>& animationData)
 {
-	const TArray<VSMatrix>& animationFrames = animationData.Size() > 0 ? animationData : FrameTransforms;
+	const TArray<VSMatrix>& animationFrames = &animationData ? animationData : FrameTransforms;
 
 	int numbones = Joints.Size();
 
