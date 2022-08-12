@@ -5,6 +5,7 @@
 #include "texturemanager.h"
 #include "modelrenderer.h"
 #include "engineerrors.h"
+#include "r_utility.h"
 
 IQMModel::IQMModel()
 {
@@ -435,14 +436,9 @@ int IQMModel::FindFrame(const char* name)
 	return -1;
 }
 
-void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation, const FTextureID* surfaceskinids, TArray<VSMatrix> animationData)
+void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation, const FTextureID* surfaceskinids, const TArray<VSMatrix>& animationData)
 {
-	TArray<VSMatrix> animationFrames = animationData.Size() > 0 ? animationData : FrameTransforms;
-
-	if (animationFrames.Size() == 0)
-	{
-		animationFrames = baseframe;
-	}
+	const TArray<VSMatrix>& animationFrames = animationData.Size() > 0 ? animationData : FrameTransforms;
 
 	int numbones = Joints.Size();
 

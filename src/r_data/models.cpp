@@ -352,9 +352,9 @@ void RenderFrameModels(FModelRenderer *renderer, FLevelLocals *Level, const FSpr
 			}
 
 			if (smfNext && modelframe != modelframenext)
-				mdl->RenderFrame(renderer, tex, modelframe, modelframenext, inter, translation, ssidp, animationData ? *animationData : TArray<VSMatrix>());
+				mdl->RenderFrame(renderer, tex, modelframe, modelframenext, inter, translation, ssidp, *animationData);
 			else
-				mdl->RenderFrame(renderer, tex, modelframe, modelframe, 0.f, translation, ssidp, animationData ? *animationData : TArray<VSMatrix>());
+				mdl->RenderFrame(renderer, tex, modelframe, modelframe, 0.f, translation, ssidp, *animationData);
 		}
 	}
 }
