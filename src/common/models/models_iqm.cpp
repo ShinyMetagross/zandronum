@@ -169,6 +169,14 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 			}
 		}
 
+		// Swap YZ axis as we did that with the vertices down in LoadGeometry.
+		// This is an unfortunate side effect of the coordinate system in the gzdoom model rendering system
+		float swapYZ[16] = { 0.0f };
+		swapYZ[0 + 0 * 4] = 1.0f;
+		swapYZ[1 + 2 * 4] = 1.0f;
+		swapYZ[2 + 1 * 4] = 1.0f;
+		swapYZ[3 + 3 * 4] = 1.0f;
+
 		FrameTransforms.Resize(num_frames * num_poses);
 		reader.SeekTo(ofs_frames);
 		for (uint32_t i = 0; i < num_frames; i++)
@@ -220,14 +228,6 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 				}
 			}
 
-			// Swap YZ axis as we did that with the vertices down in LoadGeometry.
-			// This is an unfortunate side effect of the coordinate system in the gzdoom model rendering system
-			float swapYZ[16] = { 0.0f };
-			swapYZ[0 + 0 * 4] = 1.0f;
-			swapYZ[1 + 2 * 4] = 1.0f;
-			swapYZ[2 + 1 * 4] = 1.0f;
-			swapYZ[3 + 3 * 4] = 1.0f;
-
 			for (uint32_t j = 0; j < num_poses; j++)
 			{
 				VSMatrix m;
@@ -235,6 +235,61 @@ bool IQMModel::Load(const char* path, int lumpnum, const char* buffer, int lengt
 				m.multMatrix(FrameTransforms[i * num_poses + j]);
 				m.multMatrix(swapYZ);
 				FrameTransforms[i * num_poses + j] = m;
+			}
+		}
+
+		//If a model doesn't have an animation loaded, it will crash. We don't want that!
+		if (num_frames <= 0)
+		{
+			num_frames = 1;
+			FrameTransforms.Resize(num_joints);
+
+			for (uint32_t j = 0; j < num_joints; j++)
+			{
+				FVector3 translate;
+				translate.X = Joints[j].Translate.X;
+				translate.Y = Joints[j].Translate.Y;
+				translate.Z = Joints[j].Translate.Z;
+				
+				FVector4 quaternion;
+				quaternion.X = Joints[j].Quaternion.X;
+				quaternion.Y = Joints[j].Quaternion.Y;
+				quaternion.Z = Joints[j].Quaternion.Z;
+				quaternion.W = Joints[j].Quaternion.W;
+				quaternion.MakeUnit();
+
+				FVector3 scale;
+				scale.X = Joints[j].Scale.X;
+				scale.Y = Joints[j].Scale.Y;
+				scale.Z = Joints[j].Scale.Z;
+
+				VSMatrix m;
+				m.loadIdentity();
+				m.translate(translate.X, translate.Y, translate.Z);
+				m.multQuaternion(quaternion);
+				m.scale(scale.X, scale.Y, scale.Z);
+
+				VSMatrix& result = FrameTransforms[j];
+				if (Joints[j].Parent >= 0)
+				{
+					result = baseframe[Joints[j].Parent];
+					result.multMatrix(m);
+					result.multMatrix(inversebaseframe[j]);
+				}
+				else
+				{
+					result = m;
+					result.multMatrix(inversebaseframe[j]);
+				}
+			}
+
+			for (uint32_t j = 0; j < num_joints; j++)
+			{
+				VSMatrix m;
+				m.loadMatrix(swapYZ);
+				m.multMatrix(FrameTransforms[j]);
+				m.multMatrix(swapYZ);
+				FrameTransforms[j] = m;
 			}
 		}
 
