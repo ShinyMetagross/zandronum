@@ -216,7 +216,7 @@ static const char *shaderBindings = R"(
 
 		vec4 uDetailParms;
 		vec4 uNpotEmulation;
-		vec4 padding2, padding3;
+		vec4 padding1, padding2, padding3;
 	};
 
 	layout(set = 1, binding = 2, std140) uniform StreamUBO {
