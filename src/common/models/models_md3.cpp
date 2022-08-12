@@ -328,7 +328,7 @@ void FMD3Model::AddSkins(uint8_t *hitlist, const FTextureID* surfaceskinids)
 //
 //===========================================================================
 
-int FMD3Model::FindFrame(const char * name)
+int FMD3Model::FindFrame(const char* name, bool nodefault)
 {
 	for (unsigned i = 0; i < Frames.Size(); i++)
 	{

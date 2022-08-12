@@ -480,15 +480,14 @@ void IQMModel::UnloadGeometry()
 	Vertices.Reset();
 }
 
-int IQMModel::FindFrame(const char* name)
+int IQMModel::FindFrame(const char* name, bool nodefault)
 {
-	// To do: how does this map to anything in an iqm model? the animation perhaps?
-
+	// This doesn't really mean all that much for IQM
 	for (unsigned i = 0; i < Anims.Size(); i++)
 	{
 		if (!stricmp(name, Anims[i].Name.GetChars())) return i;
 	}
-	return -1;
+	return FErr_NotFound;
 }
 
 void IQMModel::RenderFrame(FModelRenderer* renderer, FGameTexture* skin, int frame1, int frame2, double inter, int translation, const FTextureID* surfaceskinids, const TArray<VSMatrix>& animationData)
