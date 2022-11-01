@@ -510,6 +510,14 @@ const TArray<TRS>* IQMModel::AttachAnimationData()
 	return &TRSData;
 }
 
+const TRS IQMModel::ReturnBoneData(AActor* actor, int modelindex, int boneindex)
+{
+	int numbones = Joints.Size();
+	int parentJoint = Joints[boneindex].Parent;
+	TRS boneExport = actor->boneComponentData->trscomponents[modelindex][boneindex];
+	return boneExport;
+}
+
 const TArray<VSMatrix> IQMModel::CalculateBones(int frame1, int frame2, double inter, const TArray<TRS>& animationData, AActor* actor, int index)
 {
 	const TArray<TRS>& animationFrames = &animationData ? animationData : TRSData;
@@ -542,6 +550,28 @@ const TArray<VSMatrix> IQMModel::CalculateBones(int frame1, int frame2, double i
 		TRS bone;
 		TRS from = animationFrames[offset1 + i];
 		TRS to = animationFrames[offset2 + i];
+
+		if (actor->boneManipulationData != nullptr)
+		{
+			if (index < actor->boneManipulationData->boneComponentsOld.Size())
+			{
+				if (i < actor->boneManipulationData->boneComponentsOld[index].Size())
+				{
+					from.translation += actor->boneManipulationData->boneComponentsOld[index][i].translation;
+					from.rotation = actor->boneManipulationData->boneComponentsOld[index][i].rotation * from.rotation;
+					from.scaling += actor->boneManipulationData->boneComponentsOld[index][i].scaling;
+				}
+			}
+			if (index < actor->boneManipulationData->boneComponentsNew.Size())
+			{
+				if (i < actor->boneManipulationData->boneComponentsNew[index].Size())
+				{
+					to.translation += actor->boneManipulationData->boneComponentsNew[index][i].translation;
+					to.rotation = actor->boneManipulationData->boneComponentsNew[index][i].rotation * to.rotation;
+					to.scaling += actor->boneManipulationData->boneComponentsNew[index][i].scaling;
+				}
+			}
+		}
 
 		bone.translation = from.translation * invt + to.translation * t;
 		bone.rotation = from.rotation * invt;
@@ -580,27 +610,21 @@ const TArray<VSMatrix> IQMModel::CalculateBones(int frame1, int frame2, double i
 		if (Joints[i].Parent >= 0)
 		{
 			result = bones[Joints[i].Parent];
+			result.multMatrix(swapYZ);
 			result.multMatrix(baseframe[Joints[i].Parent]);
 			result.multMatrix(m);
 			result.multMatrix(inversebaseframe[i]);
 		}
 		else
 		{
-			result = m;
+			result.loadMatrix(swapYZ);
+			result.multMatrix(m);
 			result.multMatrix(inversebaseframe[i]);
 		}
+		result.multMatrix(swapYZ);
 	}
 
 	actor->boneComponentData->trsmatrix[index] = bones;
-
-	for (uint32_t j = 0; j < numbones; j++)
-	{
-		VSMatrix m;
-		m.loadMatrix(swapYZ);
-		m.multMatrix(bones[j]);
-		m.multMatrix(swapYZ);
-		bones[j] = m;
-	}
 
 	return bones;
 }

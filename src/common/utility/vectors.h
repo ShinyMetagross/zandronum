@@ -836,19 +836,19 @@ struct TVector4
 	// Multiply as Quaternion
 	TVector4& operator*= (const TVector4& v)
 	{
-		X = v.W * X + v.X * W + v.Y * Z - v.Z * Y;
-		Y = v.W * Y + v.Y * W + v.Z * X - v.X * Z;
-		Z = v.W * Z + v.Z * W + v.X * Y - v.Y * X;
-		W = v.W * W - v.X * X - v.Y * Y - v.Z * Z;
+		X = W * v.X + X * v.W + Y * v.Z - Z * v.Y;
+		Y = W * v.Y + Y * v.W + Z * v.X - X * v.Z;
+		Z = W * v.Z + Z * v.W + X * v.Y - Y * v.X;
+		W = W * v.W - X * v.X - Y * v.Y - Z * v.Z;
 		return *this;
 	}
 
 	friend TVector4 operator* (const TVector4& v1, const TVector4& v2)
 	{
-		return TVector4(v2.W * v1.X + v2.X * v1.W + v2.Y * v1.Z - v1.Z * v1.Y,
-			v2.W * v1.Y + v2.Y * v1.W + v2.Z * v1.X - v2.X * v1.Z,
-			v2.W * v1.Z + v2.Z * v1.W + v2.X * v1.Y - v2.Y * v1.X,
-			v2.W * v1.W - v2.X * v1.X - v2.Y * v1.Y - v2.Z * v1.Z
+		return TVector4(v1.W * v2.X + v1.X * v2.W + v1.Y * v2.Z - v1.Z * v2.Y,
+						v1.W * v2.Y + v1.Y * v2.W + v1.Z * v2.X - v1.X * v2.Z,
+						v1.W * v2.Z + v1.Z * v2.W + v1.X * v2.Y - v1.Y * v2.X,
+						v1.W * v2.W - v1.X * v2.X - v1.Y * v2.Y - v1.Z * v2.Z
 		);
 	}
 

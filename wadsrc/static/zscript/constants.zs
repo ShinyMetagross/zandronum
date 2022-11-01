@@ -373,6 +373,27 @@ enum ChangeModelFlags
 	CMDL_USESURFACESKIN = 1 << 2,
 };
 
+// Manipulate Bone Flags
+enum ManipulateBoneFlags
+{
+	BM_USEEULER = 1
+};
+
+// Bone getter words
+enum GetBoneFlags
+{
+	BONE_POS_X = 1,
+	BONE_POS_Y = 1 << 1,
+	BONE_POS_Z = 1 << 2,
+	BONE_ROT_X = 1 << 3,
+	BONE_ROT_Y = 1 << 4,
+	BONE_ROT_Z = 1 << 5,
+	BONE_ROT_W = 1 << 6,
+	BONE_SCA_X = 1 << 7,
+	BONE_SCA_Y = 1 << 8,
+	BONE_SCA_Z = 1 << 9
+};
+
 // Activation flags
 enum EActivationFlags
 {

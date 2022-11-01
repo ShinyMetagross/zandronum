@@ -697,8 +697,19 @@ class DBoneComponents : public DObject
 public:
 	TArray<TArray<TRS>>			trscomponents;
 	TArray<TArray<VSMatrix>>	trsmatrix;
+	TArray<int>					modelids;
 
 	DBoneComponents() = default;
+};
+
+class DBoneManipulations : public DObject
+{
+	DECLARE_CLASS(DBoneComponents, DObject);
+public:
+	TArray<TArray<TRS>>			boneComponentsNew;
+	TArray<TArray<TRS>>			boneComponentsOld;
+
+	DBoneManipulations() = default;
 };
 
 class DViewPosition : public DObject
@@ -1098,6 +1109,7 @@ public:
 	double			FloatSpeed;
 	TObjPtr<DActorModelData*>		modelData;
 	TObjPtr<DBoneComponents*>		boneComponentData;
+	TObjPtr<DBoneManipulations*>	boneManipulationData;
 
 // interaction info
 	FBlockNode		*BlockNode;			// links in blocks (if needed)

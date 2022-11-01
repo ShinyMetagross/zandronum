@@ -114,6 +114,7 @@ public:
 	void AddSkins(uint8_t* hitlist, const FTextureID* surfaceskinids) override;
 	const TArray<TRS>* AttachAnimationData() override;
 	const TArray<VSMatrix> CalculateBones(int frame1, int frame2, double inter, const TArray<TRS>& animationData, AActor* actor, int index) override;
+	const TRS ReturnBoneData(AActor* actor, int modelindex, int boneindex) override;
 
 private:
 	void LoadGeometry();

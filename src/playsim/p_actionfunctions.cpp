@@ -5195,3 +5195,171 @@ DEFINE_ACTION_FUNCTION(AActor, GetRenderStyle)
 	}
 	ACTION_RETURN_INT(-1);	// no symbolic constant exists to handle this style.
 }
+
+//==========================================================================
+//
+// A_ManipulateBone(a bunch of crap)
+//
+// This function allows manipulating a bone
+//==========================================================================
+
+enum ManipulateBoneFlags
+{
+	BM_USEEULER = 1
+};
+
+DEFINE_ACTION_FUNCTION(AActor, A_ManipulateBone)
+{
+	PARAM_ACTION_PROLOGUE(AActor);
+	PARAM_INT(modelindex);
+	PARAM_INT(boneindex);
+	PARAM_FLOAT(positionX);
+	PARAM_FLOAT(positionY);
+	PARAM_FLOAT(positionZ);
+	PARAM_FLOAT(rotationX);
+	PARAM_FLOAT(rotationY);
+	PARAM_FLOAT(rotationZ);
+	PARAM_FLOAT(rotationW);
+	PARAM_FLOAT(scaleX);
+	PARAM_FLOAT(scaleY);
+	PARAM_FLOAT(scaleZ);
+	PARAM_INT(flags);
+
+	if (self == nullptr)
+		ACTION_RETURN_BOOL(false);
+
+	AActor* mobj = ACTION_CALL_FROM_INVENTORY() ? self : stateowner;
+
+	if (mobj->boneManipulationData == nullptr)
+	{
+		auto ptr = Create<DBoneManipulations>();
+		ptr->boneComponentsNew = *new TArray<TArray<TRS>>();
+		ptr->boneComponentsOld = *new TArray<TArray<TRS>>();
+		mobj->boneManipulationData = ptr;
+		GC::WriteBarrier(mobj, ptr);
+	}
+
+	while (modelindex >= mobj->boneManipulationData->boneComponentsNew.Size())
+		mobj->boneManipulationData->boneComponentsNew.Push(TArray<TRS>());
+	while (modelindex >= mobj->boneManipulationData->boneComponentsOld.Size())
+		mobj->boneManipulationData->boneComponentsOld.Push(TArray<TRS>());
+	while (boneindex >= mobj->boneManipulationData->boneComponentsNew[modelindex].Size())
+		mobj->boneManipulationData->boneComponentsNew[modelindex].Push(TRS());
+	while (boneindex >= mobj->boneManipulationData->boneComponentsOld[modelindex].Size())
+		mobj->boneManipulationData->boneComponentsOld[modelindex].Push(TRS());
+
+	if (flags & BM_USEEULER)
+	{
+		rotationX = rotationX * 3.14159265359f / 180.0f;
+		rotationY = rotationY * 3.14159265359f / 180.0f;
+		rotationZ = rotationZ * 3.14159265359f / 180.0f;
+
+		double cr = cos(rotationX * 0.5);
+		double sr = sin(rotationX * 0.5);
+		double cp = cos(rotationY * 0.5);
+		double sp = sin(rotationY * 0.5);
+		double cy = cos(rotationZ * 0.5);
+		double sy = sin(rotationZ * 0.5);
+
+		rotationW = cr * cp * cy + sr * sp * sy;
+		rotationX = sr * cp * cy - cr * sp * sy;
+		rotationY = cr * sp * cy + sr * cp * sy;
+		rotationZ = cr * cp * sy - sr * sp * cy;
+	}
+
+	mobj->boneManipulationData->boneComponentsOld[modelindex][boneindex] = mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex];
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].translation.X = positionX;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].translation.Y = positionZ;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].translation.Z = positionY;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].rotation.X = rotationX;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].rotation.Y = rotationY;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].rotation.Z = rotationZ;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].rotation.W = rotationW;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].scaling.X = scaleX;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].scaling.Y = scaleZ;
+	mobj->boneManipulationData->boneComponentsNew[modelindex][boneindex].scaling.Z = scaleY;
+
+	return 0;
+}
+
+//==========================================================================
+//
+// GetBoneInfo(int modelindex, int boneindex, int item)
+//
+// This function allows getting a bone's information
+//==========================================================================
+
+enum GetBoneFlags
+{
+	BONE_POS_X = 1,
+	BONE_POS_Y = 1 << 1,
+	BONE_POS_Z = 1 << 2,
+	BONE_ROT_X = 1 << 3,
+	BONE_ROT_Y = 1 << 4,
+	BONE_ROT_Z = 1 << 5,
+	BONE_ROT_W = 1 << 6,
+	BONE_SCA_X = 1 << 7,
+	BONE_SCA_Y = 1 << 8,
+	BONE_SCA_Z = 1 << 9
+};
+
+DEFINE_ACTION_FUNCTION(AActor, GetBoneInfo)
+{
+	if (numret > 0)
+	{
+		assert(ret != NULL);
+		PARAM_SELF_PROLOGUE(AActor);
+		PARAM_INT(modelindex);
+		PARAM_INT(boneindex);
+		PARAM_INT(item);
+
+		if (self == nullptr)
+		{
+			ret->SetFloat(0);
+		}
+
+		float result = 0.0f;
+
+		if (self->boneComponentData != nullptr && self->boneComponentData->trscomponents.Size() > modelindex && self->boneComponentData->trscomponents[modelindex].Size() > boneindex)
+		{
+			const TRS& bonePositionRelative = Models[self->boneComponentData->modelids[modelindex]]->ReturnBoneData(self,modelindex,boneindex);
+			switch (item)
+			{
+			case BONE_POS_X:
+				result = bonePositionRelative.translation.X;
+				break;
+			case BONE_POS_Y:
+				result = bonePositionRelative.translation.Y;
+				break;
+			case BONE_POS_Z:
+				result = bonePositionRelative.translation.Z;
+				break;
+			case BONE_ROT_X:
+				result = bonePositionRelative.rotation.X;
+				break;
+			case BONE_ROT_Y:
+				result = bonePositionRelative.rotation.Y;
+				break;
+			case BONE_ROT_Z:
+				result = bonePositionRelative.rotation.Z;
+				break;
+			case BONE_ROT_W:
+				result = bonePositionRelative.rotation.W;
+				break;
+			case BONE_SCA_X:
+				result = bonePositionRelative.scaling.X;
+				break;
+			case BONE_SCA_Y:
+				result = bonePositionRelative.scaling.Y;
+				break;
+			case BONE_SCA_Z:
+				result = bonePositionRelative.scaling.Z;
+				break;
+			}
+		}
+		ret->SetFloat(result);
+		return 1;
+	}
+
+	return 0;
+}
